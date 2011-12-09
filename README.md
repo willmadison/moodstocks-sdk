@@ -26,7 +26,7 @@ At its core it provides a scanner which is:
 
 ## Contact us
 
-We're here to help! Feel free to join us on our [support chat](http://moodstocks.campfirenow.com/2416e) which is inhabited weekdays 7am-5pm UTC.
+We're here to help! Feel free to join us on our [support chat](http://moodstocks.campfirenow.com/2416e) which is inhabited weekdays from [7am UTC](http://www.wolframalpha.com/input/?i=7am+UTC) to [5pm UTC](http://www.wolframalpha.com/input/?i=5pm+UTC).
 
 You can also drop us an email at
 <a href="m&#x61;&#x69;l&#116;&#111;:&#x63;&#x6F;&#110;&#x74;&#097;&#099;&#x74;&#064;&#109;&#x6F;&#x6F;&#x64;&#115;&#x74;&#111;&#099;&#x6B;s&#x2E;&#099;&#x6F;&#109;">&#x63;&#x6F;&#110;&#x74;&#097;&#099;&#x74;&#064;&#109;&#x6F;&#x6F;&#x64;&#115;&#x74;&#111;&#099;&#x6B;s&#x2E;&#099;&#x6F;&#109;</a>.
