@@ -1,0 +1,7 @@
+ARSample.xcodeproj/*.pbxuser
+ARSample.xcodeproj/*.mode*
+ARSample.xcodeproj/*.perspectivev3
+ARSample.xcodeproj/*.xcworkspace/
+ARSample.xcodeproj/xcuserdata/
+ARSample/libmoodstocks-sdk.a
+ARSample/moodstocks_sdk.h
