@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		822B28B314990898001A7DD1 /* NSObjectAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B214990898001A7DD1 /* NSObjectAdditions.m */; };
 		822B28BA149908B0001A7DD1 /* MSBarcode.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B5149908B0001A7DD1 /* MSBarcode.m */; };
 		822B28BB149908B0001A7DD1 /* MSImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B7149908B0001A7DD1 /* MSImage.m */; };
 		822B28BC149908B0001A7DD1 /* MSScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B9149908B0001A7DD1 /* MSScanner.m */; };
@@ -34,8 +33,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		822B28B114990898001A7DD1 /* NSObjectAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSObjectAdditions.h; sourceTree = "<group>"; };
-		822B28B214990898001A7DD1 /* NSObjectAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSObjectAdditions.m; sourceTree = "<group>"; };
 		822B28B4149908B0001A7DD1 /* MSBarcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSBarcode.h; sourceTree = "<group>"; };
 		822B28B5149908B0001A7DD1 /* MSBarcode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSBarcode.m; sourceTree = "<group>"; };
 		822B28B6149908B0001A7DD1 /* MSImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSImage.h; sourceTree = "<group>"; };
@@ -106,7 +103,6 @@
 		822B28AF14990849001A7DD1 /* Obj-C */ = {
 			isa = PBXGroup;
 			children = (
-				822B28B01499085B001A7DD1 /* NSObject + */,
 				822B28B4149908B0001A7DD1 /* MSBarcode.h */,
 				822B28B5149908B0001A7DD1 /* MSBarcode.m */,
 				822B28B6149908B0001A7DD1 /* MSImage.h */,
@@ -115,15 +111,6 @@
 				822B28B9149908B0001A7DD1 /* MSScanner.m */,
 			);
 			name = "Obj-C";
-			sourceTree = "<group>";
-		};
-		822B28B01499085B001A7DD1 /* NSObject + */ = {
-			isa = PBXGroup;
-			children = (
-				822B28B114990898001A7DD1 /* NSObjectAdditions.h */,
-				822B28B214990898001A7DD1 /* NSObjectAdditions.m */,
-			);
-			name = "NSObject +";
 			sourceTree = "<group>";
 		};
 		822B28C01499141D001A7DD1 /* Result View */ = {
@@ -300,7 +287,6 @@
 			files = (
 				82A165A8149907C200B8AEB4 /* main.m in Sources */,
 				82A165AC149907C200B8AEB4 /* MSAppDelegate.m in Sources */,
-				822B28B314990898001A7DD1 /* NSObjectAdditions.m in Sources */,
 				822B28BA149908B0001A7DD1 /* MSBarcode.m in Sources */,
 				822B28BB149908B0001A7DD1 /* MSImage.m in Sources */,
 				822B28BC149908B0001A7DD1 /* MSScanner.m in Sources */,

@@ -23,8 +23,6 @@
 
 #import "MSScanner.h"
 
-#import "NSObjectAdditions.h"
-
 static MSScanner *gMSScanner   = nil;
 static NSString *kMSDBFilename = @"ms.db";
 
