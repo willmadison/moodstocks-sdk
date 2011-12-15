@@ -33,7 +33,11 @@
 /* Auto-sync feature (when app starts or re-enters foreground) */
 static const BOOL kMSScannerAutoSync = YES;
 
-/* Enabled barcode formats: configure it according to your needs */
+/**
+ * Enabled barcode formats: configure it according to your needs
+ * Here only EAN-13 and QR Code formats are enabled.
+ * Feel free to add `MS_BARCODE_FMT_EAN8` if you want in addition to decode EAN-8.
+ */
 static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
                                      MS_BARCODE_FMT_QRCODE;
 #endif
