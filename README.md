@@ -28,6 +28,11 @@ We provide an [iPhone example application](https://github.com/Moodstocks/moodsto
 
 Feel free to use it as a starter to design your own app.
 
+## Resources
+
+*   [FAQ](https://github.com/Moodstocks/moodstocks-sdk/wiki/faq),
+*   [Articles & Tutorials](https://github.com/Moodstocks/moodstocks-sdk/wiki/articles).
+
 ## Contact us
 
 We're here to help! Feel free to join us on our [support chat](http://moodstocks.campfirenow.com/2416e) which is inhabited weekdays from [9am CET](http://www.wolframalpha.com/input/?i=9am+CET) to [7pm CET](http://www.wolframalpha.com/input/?i=7pm+CET).
