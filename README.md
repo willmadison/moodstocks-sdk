@@ -11,18 +11,22 @@ At its core it provides a scanner which is:
 *   **universal**: it decodes raw images previously indexed on Moodstocks API, but also barcodes (EAN 8/13 & QR Code),
 *   **real-time**: thanks to a synchronization feature, hundreds of images can be cached on the client side, allowing real-time image recognition that works off-line.
 
-## Requirements
+## Getting Started
 
-### iOS
+### Requirements
+
+#### iOS
 
 *   Xcode 4.x with iOS SDK 5.0 as base SDK, for developing,
 *   an iPhone 3GS or higher (or the iPad 2), and iOS 4.0 or higher at runtime.
 
-**IMPORTANT**: if you compile your application with another iOS SDK such as iOS SDK 4.3, it will crash at runtime.
+> **IMPORTANT** if you compile your application with another iOS SDK such as iOS SDK 4.3, it will crash at runtime.
 
-## Setup
+### Setup
 
-*Coming soon*
+We provide an [iPhone example application](https://github.com/Moodstocks/moodstocks-sdk/tree/master/sample/iphone/arsample) that includes everything you need to start your own project.
+
+Feel free to use it as a starter to design your own app.
 
 ## Contact us
 
