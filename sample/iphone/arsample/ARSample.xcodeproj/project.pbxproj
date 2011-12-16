@@ -10,7 +10,6 @@
 		822B28BA149908B0001A7DD1 /* MSBarcode.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B5149908B0001A7DD1 /* MSBarcode.m */; };
 		822B28BB149908B0001A7DD1 /* MSImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B7149908B0001A7DD1 /* MSImage.m */; };
 		822B28BC149908B0001A7DD1 /* MSScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B9149908B0001A7DD1 /* MSScanner.m */; };
-		822B28BF149912FB001A7DD1 /* libmoodstocks-sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28BD149912FB001A7DD1 /* libmoodstocks-sdk.a */; };
 		822B28C314991433001A7DD1 /* MSResultView.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28C214991433001A7DD1 /* MSResultView.m */; };
 		822B28C8149914C3001A7DD1 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28C7149914C3001A7DD1 /* MBProgressHUD.m */; };
 		822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28CA149914E3001A7DD1 /* MSScannerController.m */; };
@@ -39,8 +38,6 @@
 		822B28B7149908B0001A7DD1 /* MSImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSImage.m; sourceTree = "<group>"; };
 		822B28B8149908B0001A7DD1 /* MSScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSScanner.h; sourceTree = "<group>"; };
 		822B28B9149908B0001A7DD1 /* MSScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSScanner.m; sourceTree = "<group>"; };
-		822B28BD149912FB001A7DD1 /* libmoodstocks-sdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libmoodstocks-sdk.a"; sourceTree = "<group>"; };
-		822B28BE149912FB001A7DD1 /* moodstocks_sdk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = moodstocks_sdk.h; sourceTree = "<group>"; };
 		822B28C114991433001A7DD1 /* MSResultView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSResultView.h; sourceTree = "<group>"; };
 		822B28C214991433001A7DD1 /* MSResultView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSResultView.m; sourceTree = "<group>"; };
 		822B28C6149914C3001A7DD1 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
@@ -84,7 +81,6 @@
 				82A1659C149907C200B8AEB4 /* UIKit.framework in Frameworks */,
 				82A1659E149907C200B8AEB4 /* Foundation.framework in Frameworks */,
 				82A165A0149907C200B8AEB4 /* CoreGraphics.framework in Frameworks */,
-				822B28BF149912FB001A7DD1 /* libmoodstocks-sdk.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,8 +121,6 @@
 		822B28C414991467001A7DD1 /* C */ = {
 			isa = PBXGroup;
 			children = (
-				822B28BD149912FB001A7DD1 /* libmoodstocks-sdk.a */,
-				822B28BE149912FB001A7DD1 /* moodstocks_sdk.h */,
 			);
 			name = C;
 			sourceTree = "<group>";
