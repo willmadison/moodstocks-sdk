@@ -28,7 +28,7 @@ Please note that we also provide a [step-by-step indexing tutorial](https://gith
 ### Step 2: build & run ARSample
 
 1.   Open `ARSample.xcodeproj` in Xcode,
-2.   Grab the latest build of the SDK from the [Downloads section](https://github.com/Moodstocks/moodstocks-sdk/downloads),
+2.   Grab the latest build of the SDK from the [Downloads section](https://github.com/Moodstocks/moodstocks-sdk/downloads) (`v3_0-iOS5_0.tar.gz` at the time of writing),
 3.   Drag `moodstocks_sdk.h` and `libmoodstocks-sdk.a` into the `Moodstocks SDK/C` folder,
 4.   Open `Moodstocks SDK/Obj-C/MSScanner.m` then replace `"ApIkEy"` and `"ApIsEcReT"` with your key/secret pair,
 5.   Build & run on your device.
