@@ -33,13 +33,10 @@ Feel free to use it as a starter to design your own app.
 *   [FAQ](https://github.com/Moodstocks/moodstocks-sdk/wiki/faq),
 *   [Articles & Tutorials](https://github.com/Moodstocks/moodstocks-sdk/wiki/articles).
 
-## Contact us
+## Help
 
 We're here to help! Feel free to join us on our [support chat](http://moodstocks.campfirenow.com/2416e) which is inhabited weekdays from [9am CET](http://www.wolframalpha.com/input/?i=9am+CET) to [7pm CET](http://www.wolframalpha.com/input/?i=7pm+CET).
 
-You can also drop us an email at
-<a href="m&#x61;&#x69;l&#116;&#111;:&#x63;&#x6F;&#110;&#x74;&#097;&#099;&#x74;&#064;&#109;&#x6F;&#x6F;&#x64;&#115;&#x74;&#111;&#099;&#x6B;s&#x2E;&#099;&#x6F;&#109;">&#x63;&#x6F;&#110;&#x74;&#097;&#099;&#x74;&#064;&#109;&#x6F;&#x6F;&#x64;&#115;&#x74;&#111;&#099;&#x6B;s&#x2E;&#099;&#x6F;&#109;</a>.
-
 ## Copyright
 
-Copyright (c) 2011 Moodstocks SAS
+Copyright (c) 2012 Moodstocks SAS
