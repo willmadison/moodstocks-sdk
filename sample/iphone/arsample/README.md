@@ -42,4 +42,4 @@ Ping us on our [support chat](https://moodstocks.campfirenow.com/2416e). We're h
 
 ## Copyright
 
-Copyright (c) 2011 Moodstocks SAS
+Copyright (c) 2012 Moodstocks SAS
