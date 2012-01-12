@@ -43,7 +43,7 @@ typedef enum {
     MSSCANNER_QRCODE
 } MSResultType;
 
-@protocol MSSyncDelegate;
+@protocol MSScannerDelegate;
 
 /**
  * Wrapper around Moodstocks SDK scanner object
@@ -56,12 +56,14 @@ typedef enum {
  */
 @interface MSScanner : NSObject {
     NSString *_dbPath;
-    id<MSSyncDelegate> _delegate;
+    id<MSScannerDelegate> _delegate;
     ms_scanner_t *_scanner;
-    UIBackgroundTaskIdentifier _backgroundSync;
+    NSOperationQueue *_syncQueue;
+    NSOperationQueue *_searchQueue;
 }
 
-@property (nonatomic, assign) id<MSSyncDelegate> delegate;
+@property (nonatomic, assign) id<MSScannerDelegate> delegate;
+@property (nonatomic, readonly) ms_scanner_t *handle;
 
 /**
  * Obtain the singleton instance
@@ -81,15 +83,14 @@ typedef enum {
 /**
  * Synchronize the local database with offline content from Moodstocks API
  *
- * This method notifies the `MSSyncDelegate` delegate
+ * This method runs in the background so you can safely call it from the main thread.
  *
- * WARNING: this method is *NOT* asynchronous, i.e. it performs blocking I/O
- *          Do not call it as is within the main thread otherwise it will block
- *          your UI. Use Grand Central Dispatch or a dedicated NSThread instead
+ * Take care to implement the ad hoc `MSScannerDelegate` protocol methods since
+ * this method keeps its delegate notified.
  *
- * NOTE: this method requires an Internet connection
+ * NOTE: this method requires an Internet connection.
  */
-- (BOOL)sync:(NSError **)error;
+- (void)sync;
 
 /**
  * Check if a sync is pending
@@ -119,9 +120,19 @@ typedef enum {
 /**
  * Perform a remote image search on Moodstocks API
  *
- * NOTE: this method requires an Internet connection
+ * This method runs in the background so you can safely call it from the main thread.
+ *
+ * Take care to implement the ad hoc `MSScannerDelegate` protocol methods since
+ * this method keeps its delegate notified.
+ *
+ * NOTE: this method requires an Internet connection.
  */
-- (NSString *)apiSearch:(MSImage *)qry error:(NSError **)error;
+- (void)apiSearch:(MSImage *)qry;
+
+/**
+ * Cancel any pending API search(es)
+ */
+- (void)cancelApiSearch;
 
 /**
  * Perform 1D / 2D barcode decoding
@@ -140,10 +151,12 @@ typedef enum {
 @end
 
 /**
- * Scanner synchronization protocol
+ * Scanner protocol for asynchronous network operations
+ *
+ * NOTE: these methods are always called on main thread
  */
-@protocol MSSyncDelegate <NSObject>
-@optional
+@protocol MSScannerDelegate <NSObject>
+@required
 /**
  * Dispatched when a synchronization is about to start
  */
@@ -158,4 +171,17 @@ typedef enum {
  * Dispatched when a synchronization failed
  */
 - (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error;
+
+@optional
+/**
+ * Dispatched when an online search (aka API search) is completed
+ *
+ * NOTE: `resultID` is `nil` when there is no match
+ */
+- (void)scanner:(MSScanner *)scanner didSearchWithResult:(NSString *)resultID;
+
+/**
+ * Dispatched when an online search (aka API search) failed
+ */
+- (void)scanner:(MSScanner *)scanner failedToSearchWithError:(NSError *)error;
 @end

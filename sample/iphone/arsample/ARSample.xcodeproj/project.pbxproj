@@ -22,6 +22,8 @@
 		822B28DC14991ADC001A7DD1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DB14991ADC001A7DD1 /* CoreVideo.framework */; };
 		822B28DE14991AEF001A7DD1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DD14991AEF001A7DD1 /* CoreMedia.framework */; };
 		822B28E014991AFF001A7DD1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DF14991AFF001A7DD1 /* AVFoundation.framework */; };
+		8276355614BF185E0090BB8B /* MSSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8276355414BF185E0090BB8B /* MSSync.m */; };
+		8276355A14BF19390090BB8B /* MSApiSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 8276355814BF19390090BB8B /* MSApiSearch.m */; };
 		82A1659C149907C200B8AEB4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659B149907C200B8AEB4 /* UIKit.framework */; };
 		82A1659E149907C200B8AEB4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659D149907C200B8AEB4 /* Foundation.framework */; };
 		82A165A0149907C200B8AEB4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659F149907C200B8AEB4 /* CoreGraphics.framework */; };
@@ -54,6 +56,10 @@
 		822B28DB14991ADC001A7DD1 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		822B28DD14991AEF001A7DD1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		822B28DF14991AFF001A7DD1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		8276355414BF185E0090BB8B /* MSSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSSync.m; sourceTree = "<group>"; };
+		8276355514BF185E0090BB8B /* MSSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSync.h; sourceTree = "<group>"; };
+		8276355814BF19390090BB8B /* MSApiSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSApiSearch.m; sourceTree = "<group>"; };
+		8276355914BF19390090BB8B /* MSApiSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSApiSearch.h; sourceTree = "<group>"; };
 		82A16597149907C200B8AEB4 /* ARSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A1659B149907C200B8AEB4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		82A1659D149907C200B8AEB4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -105,6 +111,10 @@
 				822B28B7149908B0001A7DD1 /* MSImage.m */,
 				822B28B8149908B0001A7DD1 /* MSScanner.h */,
 				822B28B9149908B0001A7DD1 /* MSScanner.m */,
+				8276355414BF185E0090BB8B /* MSSync.m */,
+				8276355514BF185E0090BB8B /* MSSync.h */,
+				8276355814BF19390090BB8B /* MSApiSearch.m */,
+				8276355914BF19390090BB8B /* MSApiSearch.h */,
 			);
 			name = "Obj-C";
 			sourceTree = "<group>";
@@ -288,6 +298,8 @@
 				822B28C8149914C3001A7DD1 /* MBProgressHUD.m in Sources */,
 				822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */,
 				822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */,
+				8276355614BF185E0090BB8B /* MSSync.m in Sources */,
+				8276355A14BF19390090BB8B /* MSApiSearch.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

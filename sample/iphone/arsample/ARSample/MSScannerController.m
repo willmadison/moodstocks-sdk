@@ -84,7 +84,9 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
         _overlayController = [[MSOverlayController alloc] init];
         _processFrames = NO;
         _ts = -1;
+#if MS_HAS_AVFF
         [[MSScanner sharedInstance] setDelegate:self];
+#endif
     }
     return self;
 }
@@ -154,10 +156,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 - (void)applicationWillEnterForeground {
     if (!kMSScannerAutoSync) return;
     
-    // Start up a sync automatically (if there is not one pending)
-    if (![[MSScanner sharedInstance] isSyncing]) {
-        [self backgroundSync];
-    }
+    [self backgroundSync];
 }
 #endif
 
@@ -520,81 +519,69 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 - (void)sync {
 #if MS_HAS_AVFF
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-	[hud setLabelText:@"Syncing"];	
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        [[MSScanner sharedInstance] sync:nil];
-		dispatch_async(dispatch_get_main_queue(), ^{
-            // Whatever happened start processing frames now
-            NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)],   @"decode_ean_8",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)],  @"decode_ean_13",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)], @"decode_qrcode", nil];
-            [_overlayController scanner:self stateUpdated:state];
-            _processFrames = YES;
-            
-			[MBProgressHUD hideHUDForView:self.view animated:YES];
-		});
-	});
+    [hud setLabelText:@"Syncing"];
+    [[MSScanner sharedInstance] sync];
 #endif
 }
 
 - (void)backgroundSync {
 #if MS_HAS_AVFF
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        [[MSScanner sharedInstance] sync:nil];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        });
-	});
+    MSScanner *scanner = [MSScanner sharedInstance];
+    if (![scanner isSyncing]) {
+        [scanner sync];
+    }
 #endif
 }
 
-#pragma mark - MSSyncDelegate
+#pragma mark - MSScannerDelegate
 
 #if MS_HAS_AVFF
 -(void)scannerWillSync:(MSScanner *)scanner {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    
     NSInteger count = [[MSScanner sharedInstance] count:nil];
-    // This UI action must be dispatched into the main thread
-    CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-        NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"syncing",
-                               [NSNumber numberWithInteger:count],                                      @"images", nil];
-        [_overlayController scanner:self stateUpdated:state];
-    });
+    NSMutableDictionary *state = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"syncing"];
+    [state setValue:[NSNumber numberWithInteger:count] forKey:@"images"];
+    [_overlayController scanner:self stateUpdated:state];
 }
 
 - (void)scannerDidSync:(MSScanner *)scanner {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    
+    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    
     NSInteger count = [[MSScanner sharedInstance] count:nil];
-    // This UI action must be dispatched into the main thread
-    CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-        NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], @"syncing",
-                               [NSNumber numberWithInteger:count],                                     @"images", nil];
-        [_overlayController scanner:self stateUpdated:state];
-    });
+    NSMutableDictionary *state = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"syncing"];
+    [state setValue:[NSNumber numberWithInteger:count] forKey:@"images"];
+    if (_processFrames == NO) {
+        [state setValue:[NSNumber numberWithBool:YES] forKey:@"ready"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)]   forKey:@"decode_ean_8"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)]  forKey:@"decode_ean_13"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)] forKey:@"decode_qrcode"];
+        _processFrames = YES;
+    }
+    [_overlayController scanner:self stateUpdated:state];
 }
 
 - (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error {
+    [self scannerDidSync:scanner];
+    
     ms_errcode ecode = [error code];
-    NSString *errStr;
-    if (ecode == MS_BUSY)
-        errStr = @"A sync is pending";
-    else
-        errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-    
-    NSInteger count = [[MSScanner sharedInstance] count:nil];
-    
-    // This UI action must be dispatched into the main thread
-    CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
+    // NOTE: ignore negative error codes which are not returned by the SDK
+    //       but application specific (e.g. so far -1 is returned when cancelling)
+    if (ecode >= 0) {
+        NSString *errStr;
+        if (ecode == MS_BUSY)
+            errStr = @"A sync is pending";
+        else
+            errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
+        
         [[[[UIAlertView alloc] initWithTitle:@"Sync error"
                                      message:errStr
                                     delegate:nil
                            cancelButtonTitle:@"OK"
                            otherButtonTitles:nil] autorelease] show];
-        
-        NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], @"syncing",
-                               [NSNumber numberWithInteger:count],                                     @"images", nil];
-        [_overlayController scanner:self stateUpdated:state];
-    });
+    }
 }
 #endif
 

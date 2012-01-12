@@ -22,6 +22,8 @@
  */
 
 #import "MSScanner.h"
+#import "MSSync.h"
+#import "MSApiSearch.h"
 
 static MSScanner *gMSScanner   = nil;
 static NSString *kMSDBFilename = @"ms.db";
@@ -52,6 +54,7 @@ static NSString *kMSAPISecret  = @"ApIsEcReT";
 @implementation MSScanner
 
 @synthesize delegate = _delegate;
+@synthesize handle = _scanner;
 
 + (MSScanner *)sharedInstance {
     if (!gMSScanner) {
@@ -101,6 +104,8 @@ static NSString *kMSAPISecret  = @"ApIsEcReT";
 #endif
 
 #endif        
+        _syncQueue = [[NSOperationQueue alloc] init];
+        _searchQueue = [[NSOperationQueue alloc] init];
     }
     return self;
 }
@@ -117,6 +122,12 @@ static NSString *kMSAPISecret  = @"ApIsEcReT";
     
     [_dbPath release];
     _dbPath = nil;
+    
+    [_syncQueue release];
+    _syncQueue = nil;
+    
+    [_searchQueue release];
+    _searchQueue = nil;
     
     [super dealloc];
 }
@@ -165,51 +176,14 @@ static NSString *kMSAPISecret  = @"ApIsEcReT";
     return !err;
 }
 
-- (BOOL)sync:(NSError **)error {
-    // -------------------------------------------------
-    // BACKGROUND SYNC START
-    // -------------------------------------------------
-    // Mark this sync so that it may continue in the background
-    _backgroundSync = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (_backgroundSync != UIBackgroundTaskInvalid) {
-                [[UIApplication sharedApplication] endBackgroundTask:_backgroundSync];
-                _backgroundSync = UIBackgroundTaskInvalid;
-            }
-        });
-    }];
-    
-    [_delegate performSelector:@selector(scannerWillSync:) withObject:self];
-    
-    BOOL err = NO;
-    
-    ms_errcode ecode = ms_scanner_sync(_scanner);
-    if (ecode != MS_SUCCESS) {
-        NSError *msError = [NSError errorWithDomain:@"moodstocks-sdk" code:ecode userInfo:nil];
-        [_delegate performSelector:@selector(scanner:failedToSyncWithError:) withObject:self withObject:msError];
-        if (error != nil) {
-            *error = [[msError copy] autorelease];
-        }
-    }
-    else {
-        [_delegate performSelector:@selector(scannerDidSync:) withObject:self];
-    }
-    
-    // -------------------------------------------------
-    // BACKGROUND SYNC END
-    // -------------------------------------------------
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (_backgroundSync != UIBackgroundTaskInvalid) {
-            [[UIApplication sharedApplication] endBackgroundTask:_backgroundSync];
-            _backgroundSync = UIBackgroundTaskInvalid;
-        }
-    });
-    
-    return !err;
+- (void)sync {
+    MSSync *op = [[[MSSync alloc] initWithScanner:self] autorelease];
+    [op setDelegate:_delegate];
+    [_syncQueue addOperation:op];
 }
 
 - (BOOL)isSyncing {
-    return !!(_backgroundSync != UIBackgroundTaskInvalid);
+    return !!([_syncQueue operationCount] >= 1);
 }
 
 - (NSInteger)count:(NSError **)error {
@@ -281,22 +255,14 @@ static NSString *kMSAPISecret  = @"ApIsEcReT";
     return match;
 }
 
-- (NSString *)apiSearch:(MSImage *)qry error:(NSError **)error {
-    NSString *result = nil;
-    
-    char *uid = NULL;
-    ms_errcode ecode = ms_scanner_api_search(_scanner, [qry image], &uid);
-    if (ecode == MS_SUCCESS) {
-        if (uid != NULL) {
-            result = [NSString stringWithCString:uid encoding:NSUTF8StringEncoding];
-            free(uid);
-        }
-    }
-    else if (error) {
-        *error = [NSError errorWithDomain:@"moodstocks-sdk" code:ecode userInfo:nil];
-    }
-    
-    return result;
+- (void)apiSearch:(MSImage *)qry {
+    MSApiSearch *op = [[[MSApiSearch alloc] initWithScanner:self query:qry] autorelease];
+    [op setDelegate:_delegate];
+    [_searchQueue addOperation:op];
+}
+
+- (void)cancelApiSearch {
+    [_searchQueue cancelAllOperations];
 }
 
 - (MSBarcode *)decode:(MSImage *)qry formats:(int)formats error:(NSError **)error {

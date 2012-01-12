@@ -37,11 +37,10 @@
 @class MSOverlayController;
 
 @interface MSScannerController : UIViewController
-<MSSyncDelegate
 #if MS_HAS_AVFF
-, AVCaptureVideoDataOutputSampleBufferDelegate
-#endif
+<MSScannerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
 >
+#endif
 {
     UIView* _videoPreviewView;
     MSOverlayController *_overlayController;
