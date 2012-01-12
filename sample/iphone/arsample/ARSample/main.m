@@ -3,7 +3,7 @@
 //  ARSample
 //
 //  Created by Cédric Deltheil on 14/12/11.
-//  Copyright (c) 2011 Moodstocks. All rights reserved.
+//  Copyright (c) 2012 Moodstocks. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
