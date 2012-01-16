@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		822B28BA149908B0001A7DD1 /* MSBarcode.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B5149908B0001A7DD1 /* MSBarcode.m */; };
-		822B28BB149908B0001A7DD1 /* MSImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B7149908B0001A7DD1 /* MSImage.m */; };
-		822B28BC149908B0001A7DD1 /* MSScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28B9149908B0001A7DD1 /* MSScanner.m */; };
 		822B28C314991433001A7DD1 /* MSResultView.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28C214991433001A7DD1 /* MSResultView.m */; };
 		822B28C8149914C3001A7DD1 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28C7149914C3001A7DD1 /* MBProgressHUD.m */; };
 		822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28CA149914E3001A7DD1 /* MSScannerController.m */; };
@@ -22,8 +19,6 @@
 		822B28DC14991ADC001A7DD1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DB14991ADC001A7DD1 /* CoreVideo.framework */; };
 		822B28DE14991AEF001A7DD1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DD14991AEF001A7DD1 /* CoreMedia.framework */; };
 		822B28E014991AFF001A7DD1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DF14991AFF001A7DD1 /* AVFoundation.framework */; };
-		8276355614BF185E0090BB8B /* MSSync.m in Sources */ = {isa = PBXBuildFile; fileRef = 8276355414BF185E0090BB8B /* MSSync.m */; };
-		8276355A14BF19390090BB8B /* MSApiSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 8276355814BF19390090BB8B /* MSApiSearch.m */; };
 		82A1659C149907C200B8AEB4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659B149907C200B8AEB4 /* UIKit.framework */; };
 		82A1659E149907C200B8AEB4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659D149907C200B8AEB4 /* Foundation.framework */; };
 		82A165A0149907C200B8AEB4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82A1659F149907C200B8AEB4 /* CoreGraphics.framework */; };
@@ -34,12 +29,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		822B28B4149908B0001A7DD1 /* MSBarcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSBarcode.h; sourceTree = "<group>"; };
-		822B28B5149908B0001A7DD1 /* MSBarcode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSBarcode.m; sourceTree = "<group>"; };
-		822B28B6149908B0001A7DD1 /* MSImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSImage.h; sourceTree = "<group>"; };
-		822B28B7149908B0001A7DD1 /* MSImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSImage.m; sourceTree = "<group>"; };
-		822B28B8149908B0001A7DD1 /* MSScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSScanner.h; sourceTree = "<group>"; };
-		822B28B9149908B0001A7DD1 /* MSScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSScanner.m; sourceTree = "<group>"; };
 		822B28C114991433001A7DD1 /* MSResultView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSResultView.h; sourceTree = "<group>"; };
 		822B28C214991433001A7DD1 /* MSResultView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSResultView.m; sourceTree = "<group>"; };
 		822B28C6149914C3001A7DD1 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
@@ -56,18 +45,14 @@
 		822B28DB14991ADC001A7DD1 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		822B28DD14991AEF001A7DD1 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		822B28DF14991AFF001A7DD1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		8276355414BF185E0090BB8B /* MSSync.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSSync.m; sourceTree = "<group>"; };
-		8276355514BF185E0090BB8B /* MSSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSync.h; sourceTree = "<group>"; };
-		8276355814BF19390090BB8B /* MSApiSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSApiSearch.m; sourceTree = "<group>"; };
-		8276355914BF19390090BB8B /* MSApiSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSApiSearch.h; sourceTree = "<group>"; };
-		82A16597149907C200B8AEB4 /* ARSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		82A16597149907C200B8AEB4 /* Demo1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A1659B149907C200B8AEB4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		82A1659D149907C200B8AEB4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		82A1659F149907C200B8AEB4 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		82A165A3149907C200B8AEB4 /* ARSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ARSample-Info.plist"; sourceTree = "<group>"; };
+		82A165A3149907C200B8AEB4 /* Demo1-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Demo1-Info.plist"; sourceTree = "<group>"; };
 		82A165A5149907C200B8AEB4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		82A165A7149907C200B8AEB4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		82A165A9149907C200B8AEB4 /* ARSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ARSample-Prefix.pch"; sourceTree = "<group>"; };
+		82A165A9149907C200B8AEB4 /* Demo1-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Demo1-Prefix.pch"; sourceTree = "<group>"; };
 		82A165AA149907C200B8AEB4 /* MSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAppDelegate.h; sourceTree = "<group>"; };
 		82A165AB149907C200B8AEB4 /* MSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSAppDelegate.m; sourceTree = "<group>"; };
 		82DEE69814991D97002BA5B0 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -93,32 +78,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		822B28AD14990841001A7DD1 /* Moodstocks SDK */ = {
-			isa = PBXGroup;
-			children = (
-				822B28C414991467001A7DD1 /* C */,
-				822B28AF14990849001A7DD1 /* Obj-C */,
-			);
-			name = "Moodstocks SDK";
-			sourceTree = "<group>";
-		};
-		822B28AF14990849001A7DD1 /* Obj-C */ = {
-			isa = PBXGroup;
-			children = (
-				822B28B4149908B0001A7DD1 /* MSBarcode.h */,
-				822B28B5149908B0001A7DD1 /* MSBarcode.m */,
-				822B28B6149908B0001A7DD1 /* MSImage.h */,
-				822B28B7149908B0001A7DD1 /* MSImage.m */,
-				822B28B8149908B0001A7DD1 /* MSScanner.h */,
-				822B28B9149908B0001A7DD1 /* MSScanner.m */,
-				8276355414BF185E0090BB8B /* MSSync.m */,
-				8276355514BF185E0090BB8B /* MSSync.h */,
-				8276355814BF19390090BB8B /* MSApiSearch.m */,
-				8276355914BF19390090BB8B /* MSApiSearch.h */,
-			);
-			name = "Obj-C";
-			sourceTree = "<group>";
-		};
 		822B28C01499141D001A7DD1 /* Result View */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,13 +85,6 @@
 				822B28C214991433001A7DD1 /* MSResultView.m */,
 			);
 			name = "Result View";
-			sourceTree = "<group>";
-		};
-		822B28C414991467001A7DD1 /* C */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = C;
 			sourceTree = "<group>";
 		};
 		822B28C5149914B5001A7DD1 /* MBProgressHUD */ = {
@@ -166,7 +118,7 @@
 		82A1658C149907C100B8AEB4 = {
 			isa = PBXGroup;
 			children = (
-				82A165A1149907C200B8AEB4 /* ARSample */,
+				82A165A1149907C200B8AEB4 /* Demo1 */,
 				82A1659A149907C200B8AEB4 /* Frameworks */,
 				82A16598149907C200B8AEB4 /* Products */,
 			);
@@ -175,7 +127,7 @@
 		82A16598149907C200B8AEB4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				82A16597149907C200B8AEB4 /* ARSample.app */,
+				82A16597149907C200B8AEB4 /* Demo1.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -196,10 +148,9 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		82A165A1149907C200B8AEB4 /* ARSample */ = {
+		82A165A1149907C200B8AEB4 /* Demo1 */ = {
 			isa = PBXGroup;
 			children = (
-				822B28AD14990841001A7DD1 /* Moodstocks SDK */,
 				822B28C5149914B5001A7DD1 /* MBProgressHUD */,
 				822B28CF149916B9001A7DD1 /* Scanner */,
 				822B28D0149916C0001A7DD1 /* Overlay */,
@@ -207,7 +158,7 @@
 				82A165AB149907C200B8AEB4 /* MSAppDelegate.m */,
 				82A165A2149907C200B8AEB4 /* Supporting Files */,
 			);
-			path = ARSample;
+			path = Demo1;
 			sourceTree = "<group>";
 		};
 		82A165A2149907C200B8AEB4 /* Supporting Files */ = {
@@ -216,10 +167,10 @@
 				82DEE69814991D97002BA5B0 /* Default.png */,
 				822B28D114991A8B001A7DD1 /* target.png */,
 				822B28D214991A8B001A7DD1 /* target@2x.png */,
-				82A165A3149907C200B8AEB4 /* ARSample-Info.plist */,
+				82A165A3149907C200B8AEB4 /* Demo1-Info.plist */,
 				82A165A4149907C200B8AEB4 /* InfoPlist.strings */,
 				82A165A7149907C200B8AEB4 /* main.m */,
-				82A165A9149907C200B8AEB4 /* ARSample-Prefix.pch */,
+				82A165A9149907C200B8AEB4 /* Demo1-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -227,9 +178,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		82A16596149907C100B8AEB4 /* ARSample */ = {
+		82A16596149907C100B8AEB4 /* Demo1 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 82A165AF149907C200B8AEB4 /* Build configuration list for PBXNativeTarget "ARSample" */;
+			buildConfigurationList = 82A165AF149907C200B8AEB4 /* Build configuration list for PBXNativeTarget "Demo1" */;
 			buildPhases = (
 				82A16593149907C100B8AEB4 /* Sources */,
 				82A16594149907C100B8AEB4 /* Frameworks */,
@@ -239,9 +190,9 @@
 			);
 			dependencies = (
 			);
-			name = ARSample;
-			productName = ARSample;
-			productReference = 82A16597149907C200B8AEB4 /* ARSample.app */;
+			name = Demo1;
+			productName = Demo1;
+			productReference = 82A16597149907C200B8AEB4 /* Demo1.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -253,7 +204,7 @@
 				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = Moodstocks;
 			};
-			buildConfigurationList = 82A16591149907C100B8AEB4 /* Build configuration list for PBXProject "ARSample" */;
+			buildConfigurationList = 82A16591149907C100B8AEB4 /* Build configuration list for PBXProject "Demo1" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -265,7 +216,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				82A16596149907C100B8AEB4 /* ARSample */,
+				82A16596149907C100B8AEB4 /* Demo1 */,
 			);
 		};
 /* End PBXProject section */
@@ -291,15 +242,10 @@
 			files = (
 				82A165A8149907C200B8AEB4 /* main.m in Sources */,
 				82A165AC149907C200B8AEB4 /* MSAppDelegate.m in Sources */,
-				822B28BA149908B0001A7DD1 /* MSBarcode.m in Sources */,
-				822B28BB149908B0001A7DD1 /* MSImage.m in Sources */,
-				822B28BC149908B0001A7DD1 /* MSScanner.m in Sources */,
 				822B28C314991433001A7DD1 /* MSResultView.m in Sources */,
 				822B28C8149914C3001A7DD1 /* MBProgressHUD.m in Sources */,
 				822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */,
 				822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */,
-				8276355614BF185E0090BB8B /* MSSync.m in Sources */,
-				8276355A14BF19390090BB8B /* MSApiSearch.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,14 +310,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ARSample/ARSample-Prefix.pch";
-				INFOPLIST_FILE = "ARSample/ARSample-Info.plist";
+				GCC_PREFIX_HEADER = "Demo1/Demo1-Prefix.pch";
+				INFOPLIST_FILE = "Demo1/Demo1-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/ARSample\"",
+					"\"$(SRCROOT)/Demo1\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Demo1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -380,14 +326,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ARSample/ARSample-Prefix.pch";
-				INFOPLIST_FILE = "ARSample/ARSample-Info.plist";
+				GCC_PREFIX_HEADER = "Demo1/Demo1-Prefix.pch";
+				INFOPLIST_FILE = "Demo1/Demo1-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/ARSample\"",
+					"\"$(SRCROOT)/Demo1\"",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Demo1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -395,7 +341,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		82A16591149907C100B8AEB4 /* Build configuration list for PBXProject "ARSample" */ = {
+		82A16591149907C100B8AEB4 /* Build configuration list for PBXProject "Demo1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82A165AD149907C200B8AEB4 /* Debug */,
@@ -404,7 +350,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		82A165AF149907C200B8AEB4 /* Build configuration list for PBXNativeTarget "ARSample" */ = {
+		82A165AF149907C200B8AEB4 /* Build configuration list for PBXNativeTarget "Demo1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82A165B0149907C200B8AEB4 /* Debug */,
