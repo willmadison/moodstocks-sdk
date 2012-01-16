@@ -4,7 +4,11 @@ The SDK is provided as a lightweight, embeddable and pre-built C library that co
 
 ## Getting Started
 
-[iPhone demo application](https://github.com/Moodstocks/moodstocks-sdk/tree/master/sample/iphone/arsample).
+*   [iOS step-by-step tutorial](https://github.com/Moodstocks/moodstocks-sdk/wiki/Getting-Started#wiki-ios-tutorial)
+
+## Sample applications
+
+The SDK comes with a collection of sample applications: please refer to this [guide](https://github.com/Moodstocks/moodstocks-sdk/wiki/Sample-applications) for more details.
 
 ## Links
 
