@@ -320,7 +320,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     [self.view addSubview:_toolbar];
     
     // Activity view for scanning results
-     _activityView = [[[MSActivityView alloc] initWithFrame:CGRectZero text:@""] autorelease];
+    _activityView = [[MSActivityView alloc] initWithFrame:CGRectZero text:@""];
     [_activityView sizeToFit];
     _activityView.frame = CGRectMake(0, self.view.frame.size.height - kMSScannerToolbarHeight,
                                      self.view.frame.size.width,
