@@ -410,7 +410,7 @@ static const NSInteger kMSInfoFontSize   = 14;
     if (label != nil) {
         NSString *text = [NSString stringWithFormat:@" [✔] %d %@ %@",
                           count,
-                          (count > 0 ? @"images" : @"image"),
+                          (count > 1 ? @"images" : @"image"),
                           sync ? @"(syncing...) " : @""];
         
         UIFont *font = [UIFont systemFontOfSize:kMSInfoFontSize];
