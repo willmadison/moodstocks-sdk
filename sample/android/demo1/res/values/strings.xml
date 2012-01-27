@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Demo1</string>
+    <string name="info1">One object/barcode at a time</string>
+    <string name="info2">Place it upright</string>
+</resources>
