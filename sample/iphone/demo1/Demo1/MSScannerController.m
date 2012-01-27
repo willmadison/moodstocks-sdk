@@ -84,9 +84,6 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
         _overlayController = [[MSOverlayController alloc] init];
         _processFrames = NO;
         _ts = -1;
-#if MS_HAS_AVFF
-        [[MSScanner sharedInstance] setDelegate:self];
-#endif
     }
     return self;
 }
@@ -100,8 +97,6 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
     
     [_result release];
     _result = nil;
-    
-    [[MSScanner sharedInstance] setDelegate:nil];
     
     [super dealloc];
 }
@@ -520,7 +515,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #if MS_HAS_AVFF
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     [hud setLabelText:@"Syncing"];
-    [[MSScanner sharedInstance] sync];
+    [[MSScanner sharedInstance] syncWithDelegate:self];
 #endif
 }
 
@@ -528,7 +523,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #if MS_HAS_AVFF
     MSScanner *scanner = [MSScanner sharedInstance];
     if (![scanner isSyncing]) {
-        [scanner sync];
+        [scanner syncWithDelegate:self];
     }
 #endif
 }

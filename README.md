@@ -4,7 +4,8 @@ The SDK is provided as a lightweight, embeddable and pre-built C library that co
 
 ## Getting Started
 
-*   [iOS step-by-step tutorial](https://github.com/Moodstocks/moodstocks-sdk/wiki/Getting-Started#wiki-ios-tutorial)
+*   [iOS step-by-step tutorial](https://github.com/Moodstocks/moodstocks-sdk/wiki/Getting-Started#wiki-ios-tutorial),
+*   [Android step-by-step tutorial](https://github.com/Moodstocks/moodstocks-sdk/wiki/Getting-Started#wiki-android-tutorial).
 
 ## Sample applications
 
