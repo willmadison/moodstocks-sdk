@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		82431AD414C4A553001003ED /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82431AD314C4A553001003ED /* ImageIO.framework */; };
-		82431AD614C4A558001003ED /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82431AD514C4A558001003ED /* Accelerate.framework */; };
 		82431AE714C5957B001003ED /* MSResultView.m in Sources */ = {isa = PBXBuildFile; fileRef = 82431AE514C5957B001003ED /* MSResultView.m */; };
 		82431AEC14C5AFD4001003ED /* MSActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 82431AEB14C5AFD4001003ED /* MSActivityView.m */; };
 		8277107514643613000F7539 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8277107414643613000F7539 /* UIKit.framework */; };
@@ -59,8 +57,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82431AD614C4A558001003ED /* Accelerate.framework in Frameworks */,
-				82431AD414C4A553001003ED /* ImageIO.framework in Frameworks */,
 				82F1911A146437C90033B0B8 /* AVFoundation.framework in Frameworks */,
 				82F19118146437C30033B0B8 /* CoreMedia.framework in Frameworks */,
 				82F19116146437BC0033B0B8 /* CoreVideo.framework in Frameworks */,

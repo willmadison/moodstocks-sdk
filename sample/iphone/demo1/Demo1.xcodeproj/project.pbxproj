@@ -13,9 +13,7 @@
 		822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28CD149914FE001A7DD1 /* MSOverlayController.m */; };
 		822B28D314991A8B001A7DD1 /* target.png in Resources */ = {isa = PBXBuildFile; fileRef = 822B28D114991A8B001A7DD1 /* target.png */; };
 		822B28D414991A8B001A7DD1 /* target@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 822B28D214991A8B001A7DD1 /* target@2x.png */; };
-		822B28D614991AAD001A7DD1 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28D514991AAD001A7DD1 /* ImageIO.framework */; };
 		822B28D814991AC0001A7DD1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28D714991AC0001A7DD1 /* QuartzCore.framework */; };
-		822B28DA14991ACF001A7DD1 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28D914991ACF001A7DD1 /* Accelerate.framework */; };
 		822B28DC14991ADC001A7DD1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DB14991ADC001A7DD1 /* CoreVideo.framework */; };
 		822B28DE14991AEF001A7DD1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DD14991AEF001A7DD1 /* CoreMedia.framework */; };
 		822B28E014991AFF001A7DD1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DF14991AFF001A7DD1 /* AVFoundation.framework */; };
@@ -66,9 +64,7 @@
 				822B28E014991AFF001A7DD1 /* AVFoundation.framework in Frameworks */,
 				822B28DE14991AEF001A7DD1 /* CoreMedia.framework in Frameworks */,
 				822B28DC14991ADC001A7DD1 /* CoreVideo.framework in Frameworks */,
-				822B28DA14991ACF001A7DD1 /* Accelerate.framework in Frameworks */,
 				822B28D814991AC0001A7DD1 /* QuartzCore.framework in Frameworks */,
-				822B28D614991AAD001A7DD1 /* ImageIO.framework in Frameworks */,
 				82A1659C149907C200B8AEB4 /* UIKit.framework in Frameworks */,
 				82A1659E149907C200B8AEB4 /* Foundation.framework in Frameworks */,
 				82A165A0149907C200B8AEB4 /* CoreGraphics.framework in Frameworks */,
