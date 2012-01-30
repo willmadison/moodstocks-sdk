@@ -1,0 +1,6 @@
+v3.1
+     * First release of Android build
+     * [iOS] No more dependencies on ImageIO and Accelerate frameworks
+
+v3.0
+     * Initial release, iOS build only
