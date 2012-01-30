@@ -86,7 +86,7 @@ public class ScanThread extends AsyncTask<byte[], Void, Result> {
 				Barcode bar = scanner.decode(qry, BarcodeFormats);
 				if (bar != null) {
 					int type = MSResultType.MSSCANNER_NONE;
-					switch(bar.format) {
+					switch(bar.getType()) {
 						case Barcode.Format.MS_BARCODE_FMT_EAN8: 
 							type = MSResultType.MSSCANNER_EAN8;
 							break;

@@ -70,7 +70,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	public void onResume() {
 		super.onResume();
 		OrientationListener.get().enable();
-		OrientationListener.get().addCallback(overlay);
+		OrientationListener.get().setCallback(overlay);
 		SurfaceView surface = (SurfaceView) findViewById(R.id.preview);
 		boolean camera_success = CameraManager.get().start(this, surface);
 		if (!camera_success) finish();
