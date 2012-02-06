@@ -1,3 +1,7 @@
+v3.2
+     * Be less restrictive over the image size constraint
+       Please refer to `ms_img_new` documentation
+
 v3.1
      * First release of Android build
      * [iOS] No more dependencies on ImageIO and Accelerate frameworks
