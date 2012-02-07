@@ -157,47 +157,20 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 - (void)startCapture {
 #if MS_HAS_AVFF
-    // == MOODSTOCKS SDK SETUP
-    NSError *err;
-    MSScanner *scanner = [MSScanner sharedInstance];
-    if (![scanner open:&err]) {
-        ms_errcode ecode = [err code];
-        if (ecode == MS_CREDMISMATCH) {
-            // DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
-            NSString *errStr = @"there is a problem with your key/secret pair: "
-                                "the current pair does NOT match with the one recorded within the on-disk datastore. "
-                                "This could happen if:\n"
-                                " * you have first build & run the app without replacing the default"
-                                " \"ApIkEy\" and \"ApIsEcReT\" pair, and later on replaced with your real key/secret,\n"
-                                " * or, you have first made a typo on the key/secret pair, build & run the"
-                                " app, and later on fixed the typo and re-deployed.\n"
-                                "\n"
-                                "To solve your problem:\n"
-                                " 1) uninstall the app from your device,\n"
-                                " 2) make sure to properly configure your key/secret pair within MSScanner.m\n"
-                                " 3) re-build & run\n";
-            NSLog(@"\n\n [START CAPTURE] SCANNER OPEN ERROR: %@", errStr);
-        }
-        else {
-            NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-            NSLog(@" [START CAPTURE] SCANNER OPEN ERROR: %@", errStr);
-        }
-    }
+    // == SYNC & OVERLAY INITIALIZATION
+    NSInteger count = [[MSScanner sharedInstance] count:nil];
+    if (count <= 0)
+        [self sync];
     else {
-        NSInteger count = [scanner count:nil];
-        if (count <= 0)
-            [self sync];
-        else {
-            if (kMSScannerAutoSync) [self backgroundSync];
+        if (kMSScannerAutoSync) [self backgroundSync];
             
-            NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)],   @"decode_ean_8",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)],  @"decode_ean_13",
-                                   [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)], @"decode_qrcode",
-                                   [NSNumber numberWithInteger:count],                                      @"images", nil];
-            [_overlayController scanner:self stateUpdated:state];
-            _processFrames = YES;
-        }
+        NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
+                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)],   @"decode_ean_8",
+                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)],  @"decode_ean_13",
+                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)], @"decode_qrcode",
+                               [NSNumber numberWithInteger:count],                                      @"images", nil];
+        [_overlayController scanner:self stateUpdated:state];
+        _processFrames = YES;
     }
     
     // == NOTIFICATIONS SETUP

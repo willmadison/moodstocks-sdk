@@ -23,6 +23,7 @@
 
 #import "MSAppDelegate.h"
 
+#import "MSScanner.h"
 #import "MSScannerController.h"
 
 @implementation MSAppDelegate
@@ -39,6 +40,35 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+#if !TARGET_IPHONE_SIMULATOR
+    // == MOODSTOCKS SDK SETUP
+    NSError *err;
+    MSScanner *scanner = [MSScanner sharedInstance];
+    if (![scanner open:&err]) {
+        ms_errcode ecode = [err code];
+        if (ecode == MS_CREDMISMATCH) {
+            // DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
+            NSString *errStr = @"there is a problem with your key/secret pair: "
+            "the current pair does NOT match with the one recorded within the on-disk datastore. "
+            "This could happen if:\n"
+            " * you have first build & run the app without replacing the default"
+            " \"ApIkEy\" and \"ApIsEcReT\" pair, and later on replaced with your real key/secret,\n"
+            " * or, you have first made a typo on the key/secret pair, build & run the"
+            " app, and later on fixed the typo and re-deployed.\n"
+            "\n"
+            "To solve your problem:\n"
+            " 1) uninstall the app from your device,\n"
+            " 2) make sure to properly configure your key/secret pair within MSScanner.m\n"
+            " 3) re-build & run\n";
+            NSLog(@"\n\n [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
+        }
+        else {
+            NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
+            NSLog(@" [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
+        }
+    }
+#endif
+    
     MSScannerController *rootViewController = [[[MSScannerController alloc] init] autorelease];
     self.navigationController = [[[UINavigationController alloc] initWithRootViewController:rootViewController] autorelease];    
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
