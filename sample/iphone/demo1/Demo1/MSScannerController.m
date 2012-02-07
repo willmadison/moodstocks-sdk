@@ -481,10 +481,6 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
     
     self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     self.navigationController.navigationBar.tintColor = nil;
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
     
     [self startCapture];
 }
