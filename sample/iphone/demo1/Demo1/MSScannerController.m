@@ -489,12 +489,6 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
     [self startCapture];
 }
 
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    
-    [self stopCapture];
-}
-
 - (void)viewDidUnload
 {
     [super viewDidUnload];
