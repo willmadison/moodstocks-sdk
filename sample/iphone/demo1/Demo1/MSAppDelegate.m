@@ -47,7 +47,7 @@
     if (![scanner open:&err]) {
         ms_errcode ecode = [err code];
         if (ecode == MS_CREDMISMATCH) {
-            // DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
+            // == DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
             NSString *errStr = @"there is a problem with your key/secret pair: "
             "the current pair does NOT match with the one recorded within the on-disk datastore. "
             "This could happen if:\n"
@@ -61,6 +61,12 @@
             " 2) make sure to properly configure your key/secret pair within MSScanner.m\n"
             " 3) re-build & run\n";
             NSLog(@"\n\n [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
+            
+            // NOTE: we purposely crash the app here so that the developer detect the problem
+            [[NSException exceptionWithName:@"MSScannerException" 
+                                     reason:@"Credentials mismatch"
+                                   userInfo:nil] raise];
+            // == DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
         }
         else {
             NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
