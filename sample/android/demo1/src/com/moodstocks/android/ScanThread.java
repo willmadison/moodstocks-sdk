@@ -70,6 +70,11 @@ public class ScanThread extends AsyncTask<byte[], Void, Result> {
 					result = _result;
 				}
 			}
+		} catch (MoodstocksError e) {
+			Log.d(TAG, "Locking failed:");
+			logError(e);
+		}
+		try {
 			//---------------
 			// IMAGE SEARCH
 			//---------------
@@ -79,6 +84,11 @@ public class ScanThread extends AsyncTask<byte[], Void, Result> {
 					result = new Result(MSResultType.MSSCANNER_IMAGE, imageID);
 				}
 			}
+		} catch (MoodstocksError e) {
+			Log.d(TAG, "Image Search failed: ");
+			logError(e);
+		}
+		try {
 			//-------------------
 			// BARCODE DECODING
 			//-------------------
@@ -87,13 +97,13 @@ public class ScanThread extends AsyncTask<byte[], Void, Result> {
 				if (bar != null) {
 					int type = MSResultType.MSSCANNER_NONE;
 					switch(bar.getType()) {
-						case Barcode.Format.MS_BARCODE_FMT_EAN8: 
+						case Barcode.Format.MS_BARCODE_FMT_EAN8:
 							type = MSResultType.MSSCANNER_EAN8;
 							break;
-						case Barcode.Format.MS_BARCODE_FMT_EAN13: 
+						case Barcode.Format.MS_BARCODE_FMT_EAN13:
 							type = MSResultType.MSSCANNER_EAN13;
-						 	break;			
-						case Barcode.Format.MS_BARCODE_FMT_QRCODE: 
+						 	break;
+						case Barcode.Format.MS_BARCODE_FMT_QRCODE:
 							type = MSResultType.MSSCANNER_QRCODE;
 						  break;
 					}
@@ -101,6 +111,7 @@ public class ScanThread extends AsyncTask<byte[], Void, Result> {
 				}
 			}
 		} catch (MoodstocksError e) {
+			Log.d(TAG, "Barcode Decoding failed: ");
 			logError(e);
 		}
 		qry.finalize();
