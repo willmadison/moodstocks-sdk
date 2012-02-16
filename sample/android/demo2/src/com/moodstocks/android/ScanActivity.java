@@ -43,6 +43,7 @@ public class ScanActivity extends Activity implements ScanThread.Listener, Camer
 	private ScanThread thread = null;
 	private boolean thread_running = false;
 	private boolean search_requested = false;
+	private Image search_qry = null;
 	private Result _result = null;
 	private int _losts = 0;
 
@@ -112,8 +113,9 @@ public class ScanActivity extends Activity implements ScanThread.Listener, Camer
 		if (search_requested) {
 			//online search
 			search_requested = false;
-			scanner.apiSearch(this, new Image(data, preview_width, preview_height, preview_width,
-																		 		ImageFormat.NV21, OrientationListener.get().getOrientation()));
+			search_qry = new Image(data, preview_width, preview_height, preview_width,
+														 ImageFormat.NV21, OrientationListener.get().getOrientation());
+			scanner.apiSearch(this, search_qry);
 		}
 		else if (!thread_running && !status.getBoolean("searching")) {
 			// offline search
@@ -190,6 +192,8 @@ public class ScanActivity extends Activity implements ScanThread.Listener, Camer
 	@Override
 	public void onSearchComplete(String result) {
 		status.putBoolean("searching", false);
+		search_qry.finalize();
+		search_qry = null;
 		Result r;
 		if (result != null) {
 			r = new Result(MSResultType.MSSCANNER_IMAGE, result);
@@ -202,6 +206,8 @@ public class ScanActivity extends Activity implements ScanThread.Listener, Camer
 
 	@Override
 	public void onSearchFailed(MoodstocksError e) {
+		search_qry.finalize();
+		search_qry = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(e.getMessage());
 		builder.setNeutralButton("OK",null);
