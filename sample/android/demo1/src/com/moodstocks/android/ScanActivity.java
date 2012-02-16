@@ -110,6 +110,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	
 	@Override
 	public void onDestroy() {
+		super.onDestroy();
 		try {
 			scanner.close();
 		} catch (MoodstocksError e) {
