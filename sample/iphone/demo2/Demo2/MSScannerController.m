@@ -221,9 +221,6 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     if ([self.captureSession canAddOutput:newCaptureOutput])
         [self.captureSession addOutput:newCaptureOutput];
     
-    if ([self.captureSession canAddInput:newVideoInput])
-        [self.captureSession addInput:newVideoInput];
-    
     if ([self.captureSession canAddOutput:newStillImageOutput])
         [self.captureSession addOutput:newStillImageOutput];
     
