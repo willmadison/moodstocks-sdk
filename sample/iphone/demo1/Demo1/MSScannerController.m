@@ -29,7 +29,7 @@
 
 #include "moodstocks_sdk.h"
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 /* Auto-sync feature (when app starts or re-enters foreground) */
 static const BOOL kMSScannerAutoSync = YES;
 
@@ -45,7 +45,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 /* Private stuff */
 @interface MSScannerController ()
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange;
 - (AVCaptureDevice *)cameraWithPosition:(AVCaptureDevicePosition)position;
 - (AVCaptureDevice *)backFacingCamera;
@@ -67,7 +67,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 @implementation MSScannerController
 
 @synthesize videoPreviewView = _videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @synthesize captureSession;
 @synthesize previewLayer;
 @synthesize orientation;
@@ -103,7 +103,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - Private stuff
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange {	
     UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
     
@@ -156,7 +156,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #endif
 
 - (void)startCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     // == SYNC & OVERLAY INITIALIZATION
     NSInteger count = [[MSScanner sharedInstance] count:nil];
     if (count <= 0)
@@ -254,7 +254,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 }
 
 - (void)stopCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     [captureSession stopRunning];
     
     AVCaptureInput* input = [captureSession.inputs objectAtIndex:0];
@@ -280,7 +280,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     if (!_processFrames)
         return;
@@ -475,7 +475,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #pragma mark - Synchronization
 
 - (void)sync {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     [hud setLabelText:@"Syncing"];
     [[MSScanner sharedInstance] syncWithDelegate:self];
@@ -483,7 +483,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 }
 
 - (void)backgroundSync {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     MSScanner *scanner = [MSScanner sharedInstance];
     if (![scanner isSyncing]) {
         [scanner syncWithDelegate:self];
@@ -493,7 +493,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - MSScannerDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 -(void)scannerWillSync:(MSScanner *)scanner {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     

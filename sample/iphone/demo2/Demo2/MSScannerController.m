@@ -29,7 +29,7 @@
 
 #include "moodstocks_sdk.h"
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 /**
  * Enabled barcode formats: configure it according to your needs
  * Here only EAN-13 and QR Code formats are enabled.
@@ -45,7 +45,7 @@ static const NSInteger kMSInfoFontSize   = 14;
 
 @interface MSScannerController ()
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange;
 - (AVCaptureDevice *)cameraWithPosition:(AVCaptureDevicePosition)position;
 - (AVCaptureDevice *)backFacingCamera;
@@ -78,7 +78,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 @implementation MSScannerController
 
 @synthesize videoPreviewView = _videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @synthesize captureSession;
 @synthesize previewLayer;
 @synthesize orientation;
@@ -116,7 +116,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - Private
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange {	
     UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
     
@@ -164,7 +164,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 #endif
 
 - (void)startCapture {
-#if MS_HAS_AVFF    
+#if MS_SDK_REQUIREMENTS
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
     self.orientation = AVCaptureVideoOrientationPortrait;
@@ -250,7 +250,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)stopCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     [captureSession stopRunning];
     
     AVCaptureInput* input = [captureSession.inputs objectAtIndex:0];
@@ -384,7 +384,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     if (_state != MS_SCAN_STATE_DEFAULT)
         return;
@@ -471,7 +471,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)captureAction {    
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     AVCaptureStillImageOutput* output = (AVCaptureStillImageOutput*) [captureSession.outputs objectAtIndex:1];
     AVCaptureConnection *stillImageConnection = [[self class] connectionWithMediaType:AVMediaTypeVideo fromConnections:[output connections]];
     

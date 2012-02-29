@@ -28,7 +28,7 @@
 @class ViewController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
 , MSScannerDelegate
 #endif
 >

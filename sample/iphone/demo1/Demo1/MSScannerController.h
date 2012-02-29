@@ -23,12 +23,10 @@
 
 #import <UIKit/UIKit.h>
 
-#if !TARGET_IPHONE_SIMULATOR
-#define MS_HAS_AVFF 1
-#endif
+#import "MSAvailability.h"
 
-#if MS_HAS_AVFF
-#import <AVFoundation/AVFoundation.h>
+#if MS_SDK_REQUIREMENTS
+  #import <AVFoundation/AVFoundation.h>
 #endif
 
 #import "MSScanner.h"
@@ -37,14 +35,14 @@
 @class MSOverlayController;
 
 @interface MSScannerController : UIViewController
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 <MSScannerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate
 >
 #endif
 {
     UIView* _videoPreviewView;
     MSOverlayController *_overlayController;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     AVCaptureSession*           captureSession;
     AVCaptureVideoPreviewLayer *previewLayer;
     AVCaptureVideoOrientation   orientation;
@@ -58,7 +56,7 @@
 }
 
 @property (nonatomic, retain) UIView *videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign) AVCaptureVideoOrientation orientation;
