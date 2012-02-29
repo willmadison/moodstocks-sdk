@@ -102,7 +102,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     
     _delegate = nil;
     
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] cancelApiSearch];
 #endif
     
@@ -502,7 +502,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)cancelAction {
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] cancelApiSearch];
 #endif
 }
@@ -510,7 +510,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 #pragma mark - Image search
 
 - (void)apiSearch:(MSImage *)qry {
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] apiSearch:qry withDelegate:self];
 #endif
 }
