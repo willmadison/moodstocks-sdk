@@ -543,7 +543,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - MSScannerDelegate
 
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
 - (void)scannerWillSearch:(MSScanner *)scanner {
     [self showSearching];
     
