@@ -23,14 +23,12 @@
 
 #import <UIKit/UIKit.h>
 
+#import "MSAvailability.h"
+
 @protocol MSScannerControllerDelegate;
 
-#if !TARGET_IPHONE_SIMULATOR
-#define MS_HAS_AVFF 1
-#endif
-
-#if MS_HAS_AVFF
-#import <AVFoundation/AVFoundation.h>
+#if MS_SDK_REQUIREMENTS
+  #import <AVFoundation/AVFoundation.h>
 #endif
 
 #import "MSScanner.h"
@@ -43,7 +41,7 @@ typedef enum {
 } MSScanState;
 
 @interface MSScannerController : UIViewController
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 <AVCaptureVideoDataOutputSampleBufferDelegate, MSScannerDelegate>
 #endif
 {
@@ -53,7 +51,7 @@ typedef enum {
     // Scanning UI
     UIView *_videoPreviewView;
     
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     // Scanning capture logic
     AVCaptureSession*           captureSession;
     AVCaptureVideoPreviewLayer* previewLayer;
@@ -73,7 +71,7 @@ typedef enum {
 }
 
 @property (nonatomic, retain) UIView *videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign) AVCaptureVideoOrientation orientation;

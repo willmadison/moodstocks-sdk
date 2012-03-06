@@ -29,14 +29,15 @@
 
 #include "moodstocks_sdk.h"
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 /**
- * Enabled barcode formats: configure it according to your needs
- * Here only EAN-13 and QR Code formats are enabled.
- * Feel free to add `MS_BARCODE_FMT_EAN8` if you want in addition to decode EAN-8.
+ * Enabled scanning formats
+ * Here we allow offline image recognition as well as EAN13 and QRCodes barcode decoding.
+ * Feel free to add `MS_RESULT_TYPE_EAN8` if you want in addition to decode EAN-8.
  */
-static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
-                                     MS_BARCODE_FMT_QRCODE;
+static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
+                                  MS_RESULT_TYPE_EAN13 |
+                                  MS_RESULT_TYPE_QRCODE;
 #endif
 
 /* UI settings */
@@ -45,7 +46,7 @@ static const NSInteger kMSInfoFontSize   = 14;
 
 @interface MSScannerController ()
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange;
 - (AVCaptureDevice *)cameraWithPosition:(AVCaptureDevicePosition)position;
 - (AVCaptureDevice *)backFacingCamera;
@@ -78,7 +79,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 @implementation MSScannerController
 
 @synthesize videoPreviewView = _videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @synthesize captureSession;
 @synthesize previewLayer;
 @synthesize orientation;
@@ -102,7 +103,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     
     _delegate = nil;
     
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] cancelApiSearch];
 #endif
     
@@ -116,7 +117,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - Private
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange {	
     UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
     
@@ -164,7 +165,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 #endif
 
 - (void)startCapture {
-#if MS_HAS_AVFF    
+#if MS_SDK_REQUIREMENTS
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
     self.orientation = AVCaptureVideoOrientationPortrait;
@@ -221,9 +222,6 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     if ([self.captureSession canAddOutput:newCaptureOutput])
         [self.captureSession addOutput:newCaptureOutput];
     
-    if ([self.captureSession canAddInput:newVideoInput])
-        [self.captureSession addInput:newVideoInput];
-    
     if ([self.captureSession canAddOutput:newStillImageOutput])
         [self.captureSession addOutput:newStillImageOutput];
     
@@ -250,7 +248,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)stopCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     [captureSession stopRunning];
     
     AVCaptureInput* input = [captureSession.inputs objectAtIndex:0];
@@ -384,13 +382,11 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     if (_state != MS_SCAN_STATE_DEFAULT)
         return;
-    
-    NSString *result = nil;
-    
+        
     // -------------------------------------------------
     // Frame conversion
     // -------------------------------------------------
@@ -398,54 +394,14 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     MSImage *qry = [[MSImage alloc] initWithBuffer:sampleBuffer orientation:self.orientation];
     
     // -------------------------------------------------
-    // Image search
+    // Scan
     // -------------------------------------------------
-    if (result == nil) {
-        NSError *err  = nil;
-        NSString *imageID = [scanner search:qry error:&err];
-        if (err != nil) {
-            ms_errcode ecode = [err code];
-            if (ecode != MS_EMPTY) {
-                NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-                NSLog(@" SEARCH ERROR: %@", errStr);
-            }
-        }
-        
-        if (imageID != nil) {
-            result = [NSString stringWithFormat:@"ID: %@", imageID];
-        }
-    }
-    
-    // -------------------------------------------------
-    // Barcode decoding
-    // -------------------------------------------------
-    // NOTE: barcode decoding is optional. To enhance global speed feel free
-    // to get rid of this section if you don't need to decode barcodes
-    if (result == nil) {
-        NSError *err  = nil;
-        MSBarcode *barcode = [scanner decode:qry formats:kMSBarcodeFormats error:&err];
-        if (err != nil) {
-            ms_errcode ecode = [err code];
-            NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-            NSLog(@" BARCODE ERROR: %@", errStr);
-        }
-        
-        if (barcode != nil) {
-            NSString *barcodeStr = [barcode getText];
-            switch (barcode.format) {
-                case MS_BARCODE_FMT_EAN8:
-                    result = [NSString stringWithFormat:@"EAN 8: %@", barcodeStr];
-                    break;
-                    
-                case MS_BARCODE_FMT_EAN13:
-                    result = [NSString stringWithFormat:@"EAN 13: %@", barcodeStr];
-                    break;
-                    
-                case MS_BARCODE_FMT_QRCODE:
-                    result = [NSString stringWithFormat:@"QR Code: %@", barcodeStr];
-                    break;
-            }
-        }
+    NSError *err = nil;
+    MSResult *result = [scanner scan:qry options:kMSScanOptions error:&err];
+    if (err != nil) {
+        ms_errcode ecode = [err code];
+        NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
+        NSLog(@" SCAN ERROR: %@", errStr);
     }
     
     // -------------------------------------------------
@@ -455,7 +411,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
         // Propagate the result into the main thread
         CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
             [self showActivityView];
-            [_activityView setText:result];
+            [_activityView setText:[result getValue]];
         });
     }
     
@@ -471,7 +427,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)captureAction {    
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     AVCaptureStillImageOutput* output = (AVCaptureStillImageOutput*) [captureSession.outputs objectAtIndex:1];
     AVCaptureConnection *stillImageConnection = [[self class] connectionWithMediaType:AVMediaTypeVideo fromConnections:[output connections]];
     
@@ -502,7 +458,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 }
 
 - (void)cancelAction {
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] cancelApiSearch];
 #endif
 }
@@ -510,7 +466,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 #pragma mark - Image search
 
 - (void)apiSearch:(MSImage *)qry {
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
     [[MSScanner sharedInstance] apiSearch:qry withDelegate:self];
 #endif
 }
@@ -543,7 +499,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 #pragma mark - MSScannerDelegate
 
-#if !TARGET_IPHONE_SIMULATOR
+#if MS_SDK_REQUIREMENTS
 - (void)scannerWillSearch:(MSScanner *)scanner {
     [self showSearching];
     

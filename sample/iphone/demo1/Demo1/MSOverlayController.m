@@ -460,39 +460,39 @@ static const NSInteger kMSInfoFontSize   = 14;
     }
     
     // Update result
-    NSDictionary *result = (NSDictionary *) [state objectForKey:@"result"];
+    MSResult *result = (MSResult *) [state objectForKey:@"result"];
     if (result != nil) {
-        if ([result count] == 0) {
-            [self hideResult];
-        }
-        else {
-            NSNumber *type = (NSNumber *) [result objectForKey:@"type"];
-            NSString *value = (NSString *) [result objectForKey:@"value"];
-            NSString *result;
-            switch ([type integerValue]) {
-                case MSSCANNER_IMAGE:
-                    result = value;
+        int type = [result getType];
+        if (type != MS_RESULT_TYPE_NONE) {
+            NSString *value = [result getValue];
+            NSString *resultStr;
+            switch (type) {
+                case MS_RESULT_TYPE_IMAGE:
+                    resultStr = value;
                     break;
                     
-                case MSSCANNER_EAN_8:
-                    result = [NSString stringWithFormat:@"EAN 8: %@", value];
+                case MS_RESULT_TYPE_EAN8:
+                    resultStr = [NSString stringWithFormat:@"EAN 8: %@", value];
                     break;
                     
-                case MSSCANNER_EAN_13:
-                    result = [NSString stringWithFormat:@"EAN 13: %@", value];
+                case MS_RESULT_TYPE_EAN13:
+                    resultStr = [NSString stringWithFormat:@"EAN 13: %@", value];
                     break;
                     
-                case MSSCANNER_QRCODE:
-                    result = [NSString stringWithFormat:@"QR Code: %@", value];
+                case MS_RESULT_TYPE_QRCODE:
+                    resultStr = [NSString stringWithFormat:@"QR Code: %@", value];
                     break;
                     
                 default:
-                    result = @"<UNDEFINED>";
+                    resultStr = @"<UNDEFINED>";
                     break;
             }
             
-            [self showResult:result];
-        }        
+            [self showResult:resultStr];
+        }
+        else {
+            [self hideResult];
+        }
     }
     
 }

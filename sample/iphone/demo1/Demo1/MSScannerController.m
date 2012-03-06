@@ -29,23 +29,24 @@
 
 #include "moodstocks_sdk.h"
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 /* Auto-sync feature (when app starts or re-enters foreground) */
 static const BOOL kMSScannerAutoSync = YES;
 
 /**
- * Enabled barcode formats: configure it according to your needs
- * Here only EAN-13 and QR Code formats are enabled.
- * Feel free to add `MS_BARCODE_FMT_EAN8` if you want in addition to decode EAN-8.
+ * Enabled scanning formats
+ * Here we allow offline image recognition as well as EAN13 and QRCodes barcode decoding.
+ * Feel free to add `MS_RESULT_TYPE_EAN8` if you want in addition to decode EAN-8.
  */
-static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
-                                     MS_BARCODE_FMT_QRCODE;
+static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
+                                  MS_RESULT_TYPE_EAN13 |
+                                  MS_RESULT_TYPE_QRCODE;
 #endif
 
 /* Private stuff */
 @interface MSScannerController ()
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange;
 - (AVCaptureDevice *)cameraWithPosition:(AVCaptureDevicePosition)position;
 - (AVCaptureDevice *)backFacingCamera;
@@ -67,7 +68,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 @implementation MSScannerController
 
 @synthesize videoPreviewView = _videoPreviewView;
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 @synthesize captureSession;
 @synthesize previewLayer;
 @synthesize orientation;
@@ -103,7 +104,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - Private stuff
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)deviceOrientationDidChange {	
     UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
     
@@ -156,7 +157,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #endif
 
 - (void)startCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     // == SYNC & OVERLAY INITIALIZATION
     NSInteger count = [[MSScanner sharedInstance] count:nil];
     if (count <= 0)
@@ -165,10 +166,10 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
         if (kMSScannerAutoSync) [self backgroundSync];
             
         NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
-                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)],   @"decode_ean_8",
-                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)],  @"decode_ean_13",
-                               [NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)], @"decode_qrcode",
-                               [NSNumber numberWithInteger:count],                                      @"images", nil];
+                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN8)],   @"decode_ean_8",
+                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN13)],  @"decode_ean_13",
+                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_QRCODE)], @"decode_qrcode",
+                               [NSNumber numberWithInteger:count],                                   @"images", nil];
         [_overlayController scanner:self stateUpdated:state];
         _processFrames = YES;
     }
@@ -254,7 +255,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 }
 
 - (void)stopCapture {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     [captureSession stopRunning];
     
     AVCaptureInput* input = [captureSession.inputs objectAtIndex:0];
@@ -280,113 +281,25 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     if (!_processFrames)
         return;
     
-    // Variables that hold *current* scanning result
-    NSString *result = nil;
-    MSResultType resultType = MSSCANNER_NONE;
-    
     // -------------------------------------------------
     // Frame conversion
     // -------------------------------------------------
-    MSScanner *scanner = [MSScanner sharedInstance];
     MSImage *qry = [[MSImage alloc] initWithBuffer:sampleBuffer orientation:self.orientation];
     
     // -------------------------------------------------
-    // Previous result locking
+    // Scan
     // -------------------------------------------------
-    BOOL lock = NO;
-    if (_result != nil && _losts < 2) {
-        NSInteger found = 0;
-        if (_resultType == MSSCANNER_IMAGE) {
-            found = [scanner match:qry uid:_result error:nil] ? 1 : -1;
-        }
-        else if (_resultType == MSSCANNER_QRCODE) {
-            MSBarcode *barcode = [scanner decode:qry formats:MS_BARCODE_FMT_QRCODE error:nil];
-            found = [[barcode getText] isEqualToString:_result] ? 1 : -1;
-        }
-        
-        if (found == 1) {
-            // The current frame matches with the previous result
-            lock = YES;
-            _losts = 0;
-        }
-        else if (found == -1) {
-            // The current frame looks different so release the lock
-            // if there is enough consecutive "no match"
-            _losts++;
-            lock = (_losts >= 2) ? NO : YES;
-        }
-    }
-    
-    if (lock) {
-        // Re-use the previous result and skip searching / decoding
-        // the current frame
-        result = _result;
-        resultType = _resultType;
-    }
-    
-    BOOL freshResult = NO;
-    
-    // -------------------------------------------------
-    // Image search
-    // -------------------------------------------------
-    if (result == nil) {
-        NSError *err  = nil;
-        NSString *imageID = [scanner search:qry error:&err];
-        if (err != nil) {
-            ms_errcode ecode = [err code];
-            if (ecode != MS_EMPTY) {
-                NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-                NSLog(@" SEARCH ERROR: %@", errStr);
-            }
-        }
-        
-        if (imageID != nil) {
-            freshResult = YES;
-            result = imageID;
-            resultType = MSSCANNER_IMAGE;
-        }
-    }
-    
-    // -------------------------------------------------
-    // Barcode decoding
-    // -------------------------------------------------
-    // NOTE: barcode decoding is optional. To enhance global speed feel free
-    // to get rid of this section if you don't need to decode barcodes
-    if (result == nil) {
-        NSError *err  = nil;
-        MSBarcode *barcode = [scanner decode:qry formats:kMSBarcodeFormats error:&err];
-        if (err != nil) {
-            ms_errcode ecode = [err code];
-            NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-            NSLog(@" BARCODE ERROR: %@", errStr);
-        }
-        
-        if (barcode != nil) {
-            freshResult = YES;
-            result = [barcode getText];
-            switch (barcode.format) {
-                case MS_BARCODE_FMT_EAN8:
-                    resultType = MSSCANNER_EAN_8;
-                    break;
-                    
-                case MS_BARCODE_FMT_EAN13:
-                    resultType = MSSCANNER_EAN_13;
-                    break;
-                    
-                case MS_BARCODE_FMT_QRCODE:
-                    resultType = MSSCANNER_QRCODE;
-                    break;
-                    
-                default:
-                    resultType = MSSCANNER_NONE;
-                    break;
-            }
-        }
+    NSError *err = nil;
+    MSResult *result = [[MSScanner sharedInstance] scan:qry options:kMSScanOptions error:&err];
+    if (err != nil) {
+        ms_errcode ecode = [err code];
+        NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
+        NSLog(@" SCAN ERROR: %@", errStr);
     }
     
     // -------------------------------------------------
@@ -394,20 +307,15 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
     // -------------------------------------------------
     if (result != nil) {
         _ts = [[NSDate date] timeIntervalSince1970];
-        if (freshResult) _losts = 0;
         
         // Refresh the UI if a *new* result has been found
-        if (![_result isEqualToString:result]) {
+        if (![_result isEqualToResult:result]) {
             [_result release];
             _result = [result copy];
-            _resultType = resultType;
-            _losts = 0;
             
             // This UI action must be dispatched into the main thread
             CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-                NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:result, @"value",
-                                      [NSNumber numberWithInteger:resultType],        @"type", nil];
-                NSDictionary *state = [NSDictionary dictionaryWithObject:dict forKey:@"result"];
+                NSDictionary *state = [NSDictionary dictionaryWithObject:result forKey:@"result"];
                 [_overlayController scanner:self stateUpdated:state];
             });
         }
@@ -417,14 +325,13 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
         if (now - _ts >= 1.5 /* seconds */) {
             // This UI action must be dispatched into the main thread
             CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-                NSDictionary *state = [NSDictionary dictionaryWithObject:[NSDictionary dictionary] forKey:@"result"];
+                MSResult *emptyResult = [[[MSResult alloc] initWithType:MS_RESULT_TYPE_NONE value:nil] autorelease];
+                NSDictionary *state = [NSDictionary dictionaryWithObject:emptyResult forKey:@"result"];
                 [_overlayController scanner:self stateUpdated:state];
             });
             
             [_result release];
-            _result = nil;   
-            _resultType = MSSCANNER_NONE;
-            
+            _result = nil;
             _ts = -1;
         }
     }
@@ -475,7 +382,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 #pragma mark - Synchronization
 
 - (void)sync {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     [hud setLabelText:@"Syncing"];
     [[MSScanner sharedInstance] syncWithDelegate:self];
@@ -483,7 +390,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 }
 
 - (void)backgroundSync {
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
     MSScanner *scanner = [MSScanner sharedInstance];
     if (![scanner isSyncing]) {
         [scanner syncWithDelegate:self];
@@ -493,7 +400,7 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
 
 #pragma mark - MSScannerDelegate
 
-#if MS_HAS_AVFF
+#if MS_SDK_REQUIREMENTS
 -(void)scannerWillSync:(MSScanner *)scanner {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     
@@ -513,9 +420,9 @@ static NSInteger kMSBarcodeFormats = MS_BARCODE_FMT_EAN13 |
     [state setValue:[NSNumber numberWithInteger:count] forKey:@"images"];
     if (_processFrames == NO) {
         [state setValue:[NSNumber numberWithBool:YES] forKey:@"ready"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN8)]   forKey:@"decode_ean_8"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_EAN13)]  forKey:@"decode_ean_13"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSBarcodeFormats & MS_BARCODE_FMT_QRCODE)] forKey:@"decode_qrcode"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN8)]   forKey:@"decode_ean_8"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN13)]  forKey:@"decode_ean_13"];
+        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_QRCODE)] forKey:@"decode_qrcode"];
         _processFrames = YES;
     }
     [_overlayController scanner:self stateUpdated:state];
