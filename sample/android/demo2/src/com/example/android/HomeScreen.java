@@ -1,6 +1,10 @@
-package com.moodstocks.android;
+package com.example.android;
+
+import com.moodstocks.android.*;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,8 +22,24 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 		try {
 			Scanner.get().open(this, "ms.db");
 			Scanner.get().sync(this);
+		} catch (UnsupportedDeviceException e) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setCancelable(false);
+			builder.setTitle("Unsupported device!");
+			if (e.getMessage().equals(UnsupportedDeviceException.Message.VERSION)) {
+				builder.setMessage("Device must run Android Gingerbread or over, sorry...");
+			}
+			else {
+				builder.setMessage("Device not compatible with Moodstocks SDK, sorry...");
+			}
+			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+          finish();
+        }
+			});
+			builder.show();
 		} catch (MoodstocksError e) {
-			logError(e);
+			e.log(Log.ERROR);
 			finish();
 		}
 	}
@@ -30,7 +50,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 		try {
 			Scanner.get().close();
 		} catch (MoodstocksError e) {
-			logError(e);
+			e.log(Log.ERROR);
 		}
 	}
 
@@ -40,11 +60,6 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			// launch scanner
 			startActivity(new Intent(this, ScanActivity.class));
 		}
-	}
-	
-	// log errors.
-	private static void logError(MoodstocksError e) {
-		Log.e(TAG, "MS Error #"+e.getErrorCode()+" : "+e.getMessage());
 	}
 	
 	//----------------------
@@ -63,7 +78,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 
 	@Override
 	public void onSyncFailed(MoodstocksError e) {
-		logError(e);
+		e.log(Log.DEBUG);
 	}
 	
 }

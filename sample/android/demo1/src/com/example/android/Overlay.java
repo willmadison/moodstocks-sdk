@@ -1,4 +1,6 @@
-package com.moodstocks.android;
+package com.example.android;
+
+import com.moodstocks.android.*;
 
 import android.content.Context;
 import android.os.Bundle;

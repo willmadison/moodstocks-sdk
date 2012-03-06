@@ -1,4 +1,4 @@
-package com.moodstocks.android;
+package com.example.android;
 
 import android.hardware.Camera;
 import android.os.Handler;
@@ -36,7 +36,6 @@ public class AutoFocusManager extends Handler implements Camera.AutoFocusCallbac
 	@Override
 	public void handleMessage(Message m) {
 		if (m.what == FOCUS_REQUEST && camera != null) {
-			Log.d(TAG, "received autofocus order");
 			camera.autoFocus(this);
 		}
 	}

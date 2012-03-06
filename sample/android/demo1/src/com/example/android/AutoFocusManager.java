@@ -1,4 +1,4 @@
-package com.moodstocks.android;
+package com.example.android;
 
 import android.hardware.Camera;
 import android.os.Handler;

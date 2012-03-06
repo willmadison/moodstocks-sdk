@@ -1,8 +1,11 @@
-package com.moodstocks.android;
+package com.example.android;
+
+import com.moodstocks.android.*;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +15,7 @@ import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.widget.TextView;
 
-public class ScanActivity extends Activity implements Scanner.SyncListener, ScanThread.Listener, CameraManager.Listener {
+public class ScanActivity extends Activity implements Scanner.SyncListener, Scanner.ScanListener, CameraManager.Listener {
 	
 	//-----------------------------------
 	// Interface implemented by overlays
@@ -21,20 +24,10 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		public void onStatusUpdate(Bundle status);
 	}
 
-	// Enabled barcode formats: configure it according to your needs
-	// Here only EAN-13 and QR Code formats are enabled.
-	// Feel free to add `MS_BARCODE_FMT_EAN8` if you want in addition to decode EAN-8.
-	private int BarcodeFormats = Barcode.Format.MS_BARCODE_FMT_EAN13
-														 | Barcode.Format.MS_BARCODE_FMT_QRCODE;
-
-	// Type of a scanning result
-	public static final class MSResultType {
-		public static final int MSSCANNER_NONE = -1;
-		public static final int MSSCANNER_IMAGE = 0;
-		public static final int MSSCANNER_EAN8 = 1;
-		public static final int MSSCANNER_EAN13 = 2;
-		public static final int MSSCANNER_QRCODE = 3;		
-	}
+	// Enabled scanning types: configure it according to your needs
+	// Here we allow Image recognition, EAN13 and QRCodes decoding.
+	// Feel free to add `EAN8` if you want in addition to decode EAN-8.
+	private int ScanOptions = Result.Type.IMAGE | Result.Type.EAN13 | Result.Type.QRCODE;
 	
 	public static final String TAG = "Main";
 	
@@ -45,23 +38,35 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	private Bundle status;
 	private long last_found;
 	private ProgressDialog progress;
-	private ScanThread thread = null;
-	private boolean thread_running = false;
 	private Result _result = null;
-	private int _losts = 0;
+	private boolean compatible = true;
 	
 	@Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-		overlay = (Overlay) findViewById(R.id.overlay);
-		OrientationListener.init(this);
-		status = new Bundle();
 		try {
 			scanner = Scanner.get();
 			scanner.open(this, "ms.db");
+		}  catch (UnsupportedDeviceException e) {
+			compatible = false;
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setCancelable(false);
+			builder.setTitle("Unsupported Device!");
+			if (e.getMessage().equals(UnsupportedDeviceException.Message.VERSION)) {
+				builder.setMessage("Device must run Android Gingerbread or over, sorry...");
+			}
+			else {
+				builder.setMessage("Device not compatible with Moodstocks SDK, sorry...");
+			}
+			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+          finish();
+        }
+			});
+			builder.show();
 		} catch (MoodstocksError e) {
-			logError(e);
+			e.log(Log.ERROR);
 			finish();
 		}
   }
@@ -69,43 +74,49 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	@Override
 	public void onResume() {
 		super.onResume();
-		OrientationListener.get().enable();
-		OrientationListener.get().setCallback(overlay);
-		SurfaceView surface = (SurfaceView) findViewById(R.id.preview);
-		boolean camera_success = CameraManager.get().start(this, surface);
-		if (!camera_success) finish();
-		try {
-			int nb = scanner.count();
-			// get current status
-			status.putBoolean("ready", !(nb == 0));
-		  status.putBoolean("decode_ean_8", (BarcodeFormats & Barcode.Format.MS_BARCODE_FMT_EAN8) != 0);
-		  status.putBoolean("decode_ean_13", (BarcodeFormats & Barcode.Format.MS_BARCODE_FMT_EAN13) != 0);
-		  status.putBoolean("decode_qrcode", (BarcodeFormats & Barcode.Format.MS_BARCODE_FMT_QRCODE) != 0);
-		  status.putInt("images", nb);
-		  status.putBundle("result", null);
-		  // notify overlay 
-		  overlay.onStatusUpdate(status);
-		  // non-blocking sync 
-		  scanner.sync(this);
-		} catch (MoodstocksError e) {
-			logError(e);
-		}
-		// request first frame if ready.
-		// otherwise (initial sync), it will be
-		// requested after sync is finished.
-		if (status.getBoolean("ready")) {
-			CameraManager.get().requestNewFrame();
+		if (compatible) {
+			overlay = (Overlay) findViewById(R.id.overlay);
+			OrientationListener.init(this);
+			status = new Bundle();
+			OrientationListener.get().enable();
+			OrientationListener.get().setCallback(overlay);
+			SurfaceView surface = (SurfaceView) findViewById(R.id.preview);
+			boolean camera_success = CameraManager.get().start(this, surface);
+			if (!camera_success) finish();
+			scanner.setOptions(ScanOptions);
+			try {
+				int nb = scanner.count();
+				// get current status
+				status.putBoolean("ready", !(nb == 0));
+			  status.putBoolean("decode_ean_8", (ScanOptions & Result.Type.EAN8) != 0);
+			  status.putBoolean("decode_ean_13", (ScanOptions & Result.Type.EAN13) != 0);
+			  status.putBoolean("decode_qrcode", (ScanOptions & Result.Type.QRCODE) != 0);
+			  status.putInt("images", nb);
+			  status.putBundle("result", null);
+			  // notify overlay 
+			  overlay.onStatusUpdate(status);
+			  // non-blocking sync 
+			  scanner.sync(this);
+			} catch (MoodstocksError e) {
+				e.log(Log.ERROR);
+			}
+			// request first frame if ready.
+			// otherwise (initial sync), it will be
+			// requested after sync is finished.
+			if (status.getBoolean("ready")) {
+				CameraManager.get().requestNewFrame();
+			}
 		}
 	}	
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		if (thread != null) {
-			thread.cancel(true);
+		if(compatible) {
+			Scanner.get().scanCancel();
+			OrientationListener.get().disable();
+			CameraManager.get().stop();
 		}
-		OrientationListener.get().disable();
-		CameraManager.get().stop();
 	}
 	
 	@Override
@@ -114,13 +125,8 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		try {
 			scanner.close();
 		} catch (MoodstocksError e) {
-			logError(e);
+			e.log(Log.ERROR);
 		}
-	}
-	
-	// log errors.
-	private static void logError(MoodstocksError e) {
-		Log.e(TAG, "MS Error #"+e.getErrorCode()+" : "+e.getMessage());
 	}
 	
 	//------------------------
@@ -134,23 +140,55 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		if (status.getBoolean("ready") && !thread_running) {
-			(thread = new ScanThread(this, preview_width, preview_height, BarcodeFormats, _result)).execute(data);
+		if (status.getBoolean("ready")) {
+			scanner.scan(this, new Image(data, preview_width, preview_height, preview_width, OrientationListener.get().getOrientation()));
 		}
 	}
 	
 	//---------------------
-	// ScanThread.Listener
+	// Scanner.ScanListener
 	//---------------------
+	
+
 	@Override
-	public void onThreadRunning(boolean b) {
-		thread_running = b;
+	public void onScanStart() {
+		// void implementation
+	}
+
+	@Override
+	public void onScanComplete(Result result) {
+		onResult(result);
+	}
+
+	@Override
+	public void onScanFailed(MoodstocksError e) {
+		/* we catch "invalid use of the library" and
+		 * "empty database" errors that are supposed
+		 * to be development errors only, and should
+		 * not happen at runtime.
+		 */
+		if (e.getErrorCode() == MoodstocksError.Code.MISUSE) {
+			e.log(Log.ERROR);
+			CameraManager.get().requestNewFrame();
+		}
+		else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setCancelable(false);
+			builder.setTitle("An error occurred");
+			builder.setMessage(e.getMessage());
+			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+          finish();
+        }
+			});
+			builder.show();
+		}
 	}
 	
-	// handles result from ScanThread 
-	@Override
+	//-----------------
+	// Handles results
+	//-----------------
 	public void onResult(Result result) {
-		thread = null;
 		if (result != null) {
 			last_found = System.currentTimeMillis();
 			// necessary to update status? 
@@ -164,7 +202,6 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			// update if required
 			if (update) {
 				_result = result;
-				_losts = 0;
 				Bundle r = new Bundle();
 				r.putInt("type", result.getType());
 				r.putString("value", result.getValue());
@@ -174,24 +211,19 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			}
 		}
 		else {
-			// locking
-			if (_result != null) {
-				_losts++;
-				if (_losts >=2 ) _result = null;
-			}
-			// discard result if not not found for 1.5s
+			// discard result if nothing is found for 1.5s
 			if (last_found > 0 && (System.currentTimeMillis() - last_found) > 1500 /*ms*/) {
+				_result = null;
 				last_found = -1;
 				status.putBundle("result", null);
 				overlay.onStatusUpdate(status);
 			}
 		}
 		CameraManager.get().requestNewFrame();
-		thread_running = false;
 	}
 	
 	//------------------
-	// Scanner.Listener
+	// Scanner.SyncListener
 	//------------------
 	@Override
 	public void onSyncStart() {
@@ -217,9 +249,9 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			status.putBoolean("syncing", false);
 			status.putInt("images", scanner.count());
 			status.putBoolean("ready", true);
-			overlay.onStatusUpdate(status);			
+			overlay.onStatusUpdate(status);
 		} catch (MoodstocksError e) {
-			logError(e);
+			e.log(Log.ERROR);
 		}
 	}
 
@@ -234,7 +266,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		status.putBoolean("ready", true);
 		overlay.onStatusUpdate(status);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Error!");
+		builder.setTitle("Network Error!");
 		builder.setMessage(e.getMessage());
 		builder.setPositiveButton("OK", null);
 		builder.create().show();
@@ -259,5 +291,6 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		}
 		return true;
 	}
+
 
 }

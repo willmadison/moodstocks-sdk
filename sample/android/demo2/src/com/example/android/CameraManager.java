@@ -1,4 +1,4 @@
-package com.moodstocks.android;
+package com.example.android;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,6 +8,7 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
@@ -54,7 +55,7 @@ public class CameraManager implements SurfaceHolder.Callback {
 		this.listener = l;
 		this.cam = getCameraInstance();
 		if (this.cam == null) {
-			Log.d(TAG, "ERROR: Could not access camera");
+			Log.e(TAG, "ERROR: Could not access camera");
 			return false;
 		}
 		preview = surface.getHolder();
@@ -127,6 +128,8 @@ public class CameraManager implements SurfaceHolder.Callback {
 		preview_width = best_w;
 		preview_height = best_h;
 		params.setPreviewSize(preview_width, preview_height);
+		// we force the preview format to NV21
+		params.setPreviewFormat(ImageFormat.NV21);
 		cam.setParameters(params);
 		// adapt preview orientation or portrait mode
 		cam.setDisplayOrientation(90);
@@ -151,7 +154,7 @@ public class CameraManager implements SurfaceHolder.Callback {
 		try {
 			cam.setPreviewDisplay(holder);
 		} catch (IOException e) {
-			Log.e(TAG, "Could not start preview");
+			Log.e(TAG, "ERROR: Could not start preview");
 		}
 		cam.startPreview();
 		focus_manager.start();
