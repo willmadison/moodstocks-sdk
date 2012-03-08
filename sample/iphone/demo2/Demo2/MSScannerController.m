@@ -29,6 +29,8 @@
 
 #include "moodstocks_sdk.h"
 
+#import "MSDebug.h"
+
 #if MS_SDK_REQUIREMENTS
 /**
  * Enabled scanning formats
@@ -397,7 +399,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
         if (err != nil) {
             ms_errcode ecode = [err code];
             NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-            NSLog(@" SCAN ERROR: %@", errStr);
+            MSDLog(@" SCAN ERROR: %@", errStr);
         }
         
         // -------------------------------------------------

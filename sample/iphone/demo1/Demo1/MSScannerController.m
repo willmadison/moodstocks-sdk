@@ -24,6 +24,7 @@
 #import "MSScannerController.h"
 
 #import "MSOverlayController.h"
+#import "MSDebug.h"
 #import "MSImage.h"
 #import "MBProgressHUD.h"
 
@@ -299,7 +300,7 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
     if (err != nil) {
         ms_errcode ecode = [err code];
         NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-        NSLog(@" SCAN ERROR: %@", errStr);
+        MSDLog(@" SCAN ERROR: %@", errStr);
     }
     
     // -------------------------------------------------

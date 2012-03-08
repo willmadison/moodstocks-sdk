@@ -24,6 +24,7 @@
 #import "AppDelegate.h"
 
 #import "ViewController.h"
+#import "MSDebug.h"
 
 @implementation AppDelegate
 
@@ -72,7 +73,7 @@
                 " 1) uninstall the app from your device,\n"
                 " 2) make sure to properly configure your key/secret pair within MSScanner.m\n"
                 " 3) re-build & run\n";
-                NSLog(@"\n\n [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
+                MSDLog(@"\n\n [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
                 
                 // NOTE: we purposely crash the app here so that the developer detect the problem
                 [[NSException exceptionWithName:@"MSScannerException"
@@ -82,7 +83,7 @@
             }
             else {
                 NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-                NSLog(@" [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
+                MSDLog(@" [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
             }
         }
         else {
@@ -142,12 +143,12 @@
 
 #if MS_SDK_REQUIREMENTS
 - (void)scannerWillSync:(MSScanner *)scanner {
-    NSLog(@" [MSSCANNER] WILL SYNC ");
+    MSDLog(@" [MSSCANNER] WILL SYNC ");
 }
 
 - (void)scannerDidSync:(MSScanner *)scanner {
     NSInteger count = [[MSScanner sharedInstance] count:nil];
-    NSLog(@" [MSSCANNER] DID SYNC. DATABASE SIZE = %d IMAGE(S)", count);
+    MSDLog(@" [MSSCANNER] DID SYNC. DATABASE SIZE = %d IMAGE(S)", count);
 }
 
 - (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error {
@@ -159,7 +160,7 @@
         else
             errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
         
-        NSLog(@" [MSSCANNER] FAILED TO SYNC WITH ERROR: %@", errStr);
+        MSDLog(@" [MSSCANNER] FAILED TO SYNC WITH ERROR: %@", errStr);
     }
 }
 #endif
