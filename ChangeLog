@@ -1,3 +1,8 @@
+v3.3
+     * Add support to detect device compatibility at runtime
+     * Introduce a convenient scan method for Obj-C and Java wrappers that
+       combines simultaneous offline image recognition and barcode decoding
+
 v3.2
      * Be less restrictive over the image size constraint
        Please refer to `ms_img_new` documentation
