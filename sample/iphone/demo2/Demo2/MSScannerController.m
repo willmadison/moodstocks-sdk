@@ -94,6 +94,7 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
         self.hidesBottomBarWhenPushed = YES;
         
         _state = MS_SCAN_STATE_DEFAULT;
+        _captureFrame = NO;
     }
     return self;
 }
@@ -190,13 +191,11 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     AVCaptureDeviceInput* newVideoInput            = [[AVCaptureDeviceInput alloc] initWithDevice:[self backFacingCamera] error:nil];
     AVCaptureVideoDataOutput *newCaptureOutput     = [[AVCaptureVideoDataOutput alloc] init];
     newCaptureOutput.alwaysDiscardsLateVideoFrames = YES;
-    AVCaptureStillImageOutput* newStillImageOutput = [[AVCaptureStillImageOutput alloc] init];
     videoDataOutputQueue = dispatch_queue_create("MSScannerController", DISPATCH_QUEUE_SERIAL);
     [newCaptureOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
     NSDictionary *outputSettings                   = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA]
                                                                                  forKey:(id)kCVPixelBufferPixelFormatTypeKey];
     [newCaptureOutput setVideoSettings:outputSettings];
-    [newStillImageOutput setOutputSettings:outputSettings];
     
     AVCaptureSession *cSession = [[AVCaptureSession alloc] init];
     self.captureSession = cSession;
@@ -222,12 +221,8 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     if ([self.captureSession canAddOutput:newCaptureOutput])
         [self.captureSession addOutput:newCaptureOutput];
     
-    if ([self.captureSession canAddOutput:newStillImageOutput])
-        [self.captureSession addOutput:newStillImageOutput];
-    
     [newCaptureOutput release];
     [newVideoInput release];
-    [newStillImageOutput release];
     
     // == VIDEO PREVIEW SETUP
     if (!self.previewLayer)
@@ -256,9 +251,6 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     
     AVCaptureVideoDataOutput* videoOutput = (AVCaptureVideoDataOutput*) [captureSession.outputs objectAtIndex:0];
     [captureSession removeOutput:videoOutput];
-    
-    AVCaptureStillImageOutput* imageOutput = (AVCaptureStillImageOutput*) [captureSession.outputs objectAtIndex:0];
-    [captureSession removeOutput:imageOutput];
     
     if (videoDataOutputQueue)
         dispatch_release(videoDataOutputQueue);
@@ -390,29 +382,34 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
     // -------------------------------------------------
     // Frame conversion
     // -------------------------------------------------
-    MSScanner *scanner = [MSScanner sharedInstance];
     MSImage *qry = [[MSImage alloc] initWithBuffer:sampleBuffer orientation:self.orientation];
     
-    // -------------------------------------------------
-    // Scan
-    // -------------------------------------------------
-    NSError *err = nil;
-    MSResult *result = [scanner scan:qry options:kMSScanOptions error:&err];
-    if (err != nil) {
-        ms_errcode ecode = [err code];
-        NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-        NSLog(@" SCAN ERROR: %@", errStr);
+    if (_captureFrame) {
+        _captureFrame = NO;
+        [self apiSearch:qry];
     }
-    
-    // -------------------------------------------------
-    // Update the result on screen
-    // -------------------------------------------------
-    if (result != nil) {
-        // Propagate the result into the main thread
-        CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-            [self showActivityView];
-            [_activityView setText:[result getValue]];
-        });
+    else {
+        // -------------------------------------------------
+        // Scan
+        // -------------------------------------------------
+        NSError *err = nil;
+        MSResult *result = [[MSScanner sharedInstance] scan:qry options:kMSScanOptions error:&err];
+        if (err != nil) {
+            ms_errcode ecode = [err code];
+            NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
+            NSLog(@" SCAN ERROR: %@", errStr);
+        }
+        
+        // -------------------------------------------------
+        // Update the result on screen
+        // -------------------------------------------------
+        if (result != nil) {
+            // Propagate the result into the main thread
+            CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
+                [self showActivityView];
+                [_activityView setText:[result getValue]];
+            });
+        }
     }
     
     [qry release];
@@ -428,19 +425,9 @@ static CGFloat kMSScannerRightFixedSpace = 140; // pixels
 
 - (void)captureAction {    
 #if MS_SDK_REQUIREMENTS
-    AVCaptureStillImageOutput* output = (AVCaptureStillImageOutput*) [captureSession.outputs objectAtIndex:1];
-    AVCaptureConnection *stillImageConnection = [[self class] connectionWithMediaType:AVMediaTypeVideo fromConnections:[output connections]];
+    _captureFrame = YES;
     
-    if ([stillImageConnection isVideoOrientationSupported])
-        [stillImageConnection setVideoOrientation:self.orientation];
-    
-    void (^imageCaptureHandler)(CMSampleBufferRef sampleBuffer, NSError *error) = ^(CMSampleBufferRef sampleBuffer, NSError *error) {
-        [self apiSearch:[[[MSImage alloc] initWithBuffer:sampleBuffer orientation:self.orientation] autorelease]];
-    };
-    
-    [output captureStillImageAsynchronouslyFromConnection:stillImageConnection completionHandler:imageCaptureHandler];
-    
-    // Flash effect post-capture
+    // Flash effect
     UIView* flashView = [[UIView alloc] initWithFrame:[_videoPreviewView frame]];
     [flashView setBackgroundColor:[UIColor whiteColor]];
     [[[self view] window] addSubview:flashView];

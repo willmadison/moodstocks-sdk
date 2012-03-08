@@ -47,6 +47,7 @@ typedef enum {
 {
     // Scanning state
     MSScanState _state;
+    BOOL _captureFrame;
     
     // Scanning UI
     UIView *_videoPreviewView;
