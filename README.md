@@ -15,7 +15,7 @@ The SDK comes with a collection of sample applications: please refer to this [gu
 
 *   [FAQ](https://github.com/Moodstocks/moodstocks-sdk/wiki/faq),
 *   [Articles & Tutorials](https://github.com/Moodstocks/moodstocks-sdk/wiki/articles),
-*   [Support chat](http://moodstocks.campfirenow.com/2416e).
+*   [Support chat](https://moodstocks.campfirenow.com/55fdb).
 
 ## Copyright
 
