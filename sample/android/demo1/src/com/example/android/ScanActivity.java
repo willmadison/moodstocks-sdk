@@ -16,7 +16,7 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 
 public class ScanActivity extends Activity implements Scanner.SyncListener, Scanner.ScanListener, CameraManager.Listener {
-	
+
 	//-----------------------------------
 	// Interface implemented by overlays
 	//-----------------------------------
@@ -28,9 +28,9 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	// Here we allow Image recognition, EAN13 and QRCodes decoding.
 	// Feel free to add `EAN8` if you want in addition to decode EAN-8.
 	private int ScanOptions = Result.Type.IMAGE | Result.Type.EAN13 | Result.Type.QRCODE;
-	
+
 	public static final String TAG = "Main";
-	
+
 	private int preview_width;
 	private int preview_height;
 	private Scanner scanner;
@@ -40,11 +40,11 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 	private ProgressDialog progress;
 	private Result _result = null;
 	private boolean compatible = true;
-	
+
 	@Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 		try {
 			scanner = Scanner.get();
 			scanner.open(this, "ms.db");
@@ -60,17 +60,17 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 				builder.setMessage("Device not compatible with Moodstocks SDK, sorry...");
 			}
 			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-          finish();
-        }
+				public void onClick(DialogInterface dialog, int id) {
+					finish();
+				}
 			});
 			builder.show();
 		} catch (MoodstocksError e) {
 			e.log(Log.ERROR);
 			finish();
 		}
-  }
-	
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -88,15 +88,15 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 				int nb = scanner.count();
 				// get current status
 				status.putBoolean("ready", !(nb == 0));
-			  status.putBoolean("decode_ean_8", (ScanOptions & Result.Type.EAN8) != 0);
-			  status.putBoolean("decode_ean_13", (ScanOptions & Result.Type.EAN13) != 0);
-			  status.putBoolean("decode_qrcode", (ScanOptions & Result.Type.QRCODE) != 0);
-			  status.putInt("images", nb);
-			  status.putBundle("result", null);
-			  // notify overlay 
-			  overlay.onStatusUpdate(status);
-			  // non-blocking sync 
-			  scanner.sync(this);
+				status.putBoolean("decode_ean_8", (ScanOptions & Result.Type.EAN8) != 0);
+				status.putBoolean("decode_ean_13", (ScanOptions & Result.Type.EAN13) != 0);
+				status.putBoolean("decode_qrcode", (ScanOptions & Result.Type.QRCODE) != 0);
+				status.putInt("images", nb);
+				status.putBundle("result", null);
+				// notify overlay 
+				overlay.onStatusUpdate(status);
+				// non-blocking sync 
+				scanner.sync(this);
 			} catch (MoodstocksError e) {
 				e.log(Log.ERROR);
 			}
@@ -108,7 +108,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			}
 		}
 	}	
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -118,7 +118,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			CameraManager.get().stop();
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -128,7 +128,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			e.log(Log.ERROR);
 		}
 	}
-	
+
 	//------------------------
 	// CameraManager.Listener
 	//------------------------
@@ -137,18 +137,18 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		this.preview_width = w;
 		this.preview_height = h;
 	}
-	
+
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
 		if (status.getBoolean("ready")) {
 			scanner.scan(this, new Image(data, preview_width, preview_height, preview_width, OrientationListener.get().getOrientation()));
 		}
 	}
-	
+
 	//---------------------
 	// Scanner.ScanListener
 	//---------------------
-	
+
 
 	@Override
 	public void onScanStart() {
@@ -177,14 +177,14 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			builder.setTitle("An error occurred");
 			builder.setMessage(e.getMessage());
 			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-          finish();
-        }
+				public void onClick(DialogInterface dialog, int id) {
+					finish();
+				}
 			});
 			builder.show();
 		}
 	}
-	
+
 	//-----------------
 	// Handles results
 	//-----------------
@@ -221,7 +221,7 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		}
 		CameraManager.get().requestNewFrame();
 	}
-	
+
 	//------------------
 	// Scanner.SyncListener
 	//------------------
@@ -271,18 +271,18 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 		builder.setPositiveButton("OK", null);
 		builder.create().show();
 	}
-	
+
 	//------
-  // MENU
+	// MENU
 	//------
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.sync &&

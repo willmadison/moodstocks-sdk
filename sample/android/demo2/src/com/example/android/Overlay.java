@@ -10,19 +10,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class Overlay extends RelativeLayout implements ScanActivity.Listener, Animation.AnimationListener {
-	
+
 	public static final String TAG = "Overlay";
 	private Animation expand;
 	private Animation flash;
 	private boolean up = false;
-	
+
 	public Overlay(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.expand = AnimationUtils.loadAnimation(this.getContext(), R.anim.expand);
 		this.flash = AnimationUtils.loadAnimation(this.getContext(), R.anim.flash);
 		this.flash.setAnimationListener(this);
 	}
-	
+
 	//-----------------------
 	// ScanActivity.Listener
 	//-----------------------
@@ -57,7 +57,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, An
 			}
 		}
 	}
-	
+
 	//-------------------
 	// AnimationListener
 	//-------------------

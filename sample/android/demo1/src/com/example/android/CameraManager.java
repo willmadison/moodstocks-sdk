@@ -14,30 +14,30 @@ import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 
 public class CameraManager implements SurfaceHolder.Callback {
-	
+
 	public static interface Listener extends Camera.PreviewCallback {
-		
+
 		public void onPreviewSizeFound(int w, int h);
 		public WindowManager getWindowManager();
-		
+
 	}
-	
+
 	public static final String TAG = "CameraManager";
-	
+
 	private static CameraManager instance = null;
 	private Listener listener;
 	private Camera cam;
 	private SurfaceHolder preview;
 	private AutoFocusManager focus_manager;
-	
+
 	private int preview_width;
 	private int preview_height;
 	private byte[] buffer;
-	
+
 	private CameraManager() {
 		super();
 	}
-	
+
 	public static CameraManager get() {
 		if (CameraManager.instance == null) {
 			synchronized(CameraManager.class) {
@@ -48,7 +48,7 @@ public class CameraManager implements SurfaceHolder.Callback {
 		}
 		return CameraManager.instance;
 	}
-	
+
 	public boolean start(Listener l, SurfaceView surface) {
 		this.listener = l;
 		this.cam = getCameraInstance();
@@ -61,10 +61,10 @@ public class CameraManager implements SurfaceHolder.Callback {
 		preview.addCallback(this);
 		findBestPreviewSize();
 		cam.setPreviewCallbackWithBuffer(listener);
-	  focus_manager = new AutoFocusManager(cam);
+		focus_manager = new AutoFocusManager(cam);
 		return true;
 	}
-	
+
 	public void stop() {
 		focus_manager.stop();
 		if (cam != null) {
@@ -75,22 +75,22 @@ public class CameraManager implements SurfaceHolder.Callback {
 			cam = null;
 		}
 	}
-	
+
 	public void requestNewFrame() {
 		cam.addCallbackBuffer(buffer);
 	}
-	
+
 	private static Camera getCameraInstance(){
-    Camera c = null;
-    try {
-        c = Camera.open(); // attempt to get a Camera instance
-    }
-    catch (Exception e){
-    	// camera is unavailable, return null
-    }
-    return c;
+		Camera c = null;
+		try {
+			c = Camera.open(); // attempt to get a Camera instance
+		}
+		catch (Exception e){
+			// camera is unavailable, return null
+		}
+		return c;
 	}
-	
+
 	// compute best preview size: highest possible
 	// with ratio within 10% of screen resolution
 	public void findBestPreviewSize() {

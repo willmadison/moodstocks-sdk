@@ -11,9 +11,9 @@ import android.util.Log;
 import android.view.View;
 
 public class HomeScreen extends Activity implements View.OnClickListener, Scanner.SyncListener {
-	
+
 	public static final String TAG = "HomeScreen";
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -33,9 +33,9 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 				builder.setMessage("Device not compatible with Moodstocks SDK, sorry...");
 			}
 			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-          finish();
-        }
+				public void onClick(DialogInterface dialog, int id) {
+					finish();
+				}
 			});
 			builder.show();
 		} catch (MoodstocksError e) {
@@ -43,7 +43,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			finish();
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -61,7 +61,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			startActivity(new Intent(this, ScanActivity.class));
 		}
 	}
-	
+
 	//----------------------
 	// Scanner.SyncListener
 	//----------------------
@@ -80,5 +80,5 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	public void onSyncFailed(MoodstocksError e) {
 		e.log(Log.DEBUG);
 	}
-	
+
 }

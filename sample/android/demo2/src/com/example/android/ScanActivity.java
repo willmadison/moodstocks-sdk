@@ -36,14 +36,14 @@ public class ScanActivity extends Activity implements CameraManager.Listener, Vi
 	private Result _result = null;
 
 	@Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 		overlay = (Overlay) findViewById(R.id.overlay);
 		OrientationListener.init(this);
 		status = new Bundle();
 		scanner = Scanner.get();
-  }
+	}
 
 	@Override
 	public void onResume() {
@@ -55,8 +55,8 @@ public class ScanActivity extends Activity implements CameraManager.Listener, Vi
 		scanner.setOptions(ScanOptions);
 		findViewById(R.id.snap_button).setOnClickListener(this);
 		status.putBoolean("searching", false);
-	  status.putBundle("result", null);
-	  overlay.onStatusUpdate(status);
+		status.putBundle("result", null);
+		overlay.onStatusUpdate(status);
 		CameraManager.get().requestNewFrame();
 	}
 
@@ -172,14 +172,14 @@ public class ScanActivity extends Activity implements CameraManager.Listener, Vi
 			builder.setTitle("An error occurred");
 			builder.setMessage(e.getMessage());
 			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int id) {
-          finish();
-        }
+				public void onClick(DialogInterface dialog, int id) {
+					finish();
+				}
 			});
 			builder.show();
 		}
 	}
-	
+
 	//---------------------------
 	// Scanner.ApiSearchListener
 	//---------------------------

@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class Overlay extends RelativeLayout implements ScanActivity.Listener, OrientationListener.Callback {
-	
+
 	public static final String TAG = "Overlay";
 	private int angle = 0;
 	private int ori = 0;
@@ -22,12 +22,12 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	private String images_info = "";
 	private String _result = "";
 	private Animation expand;
-	
+
 	public Overlay(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.expand = AnimationUtils.loadAnimation(this.getContext(), R.anim.expand);
 	}
-	
+
 	private void eanInfo(boolean ean8, boolean ean13) {
 		TextView tv = (TextView) findViewById(R.id.ean_info);
 		String s;
@@ -49,7 +49,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			ean_info = new String(s);
 		}
 	}
-	
+
 	private void qrInfo(boolean qr) {
 		TextView tv = (TextView) findViewById(R.id.qrcode_info);
 		String s;
@@ -64,7 +64,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			qr_info = new String(s);
 		}
 	}
-	
+
 	private void imagesInfo(int count, boolean sync) {
 		TextView tv = (TextView) findViewById(R.id.images_info);
 		String s = "[X] "+count+" images";
@@ -74,7 +74,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			images_info = new String(s);
 		}
 	}
-	
+
 	private void displayResult(String result) {
 		TextView res = (TextView) findViewById(R.id.result);
 		res.setText(result);
@@ -87,7 +87,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			_result = new String(result);
 		}
 	}
-	
+
 	private void setTargetVisible(boolean b) {
 		ImageView v = (ImageView) findViewById(R.id.target);
 		if (b) {
@@ -106,7 +106,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			v.clearAnimation();
 		}
 	}
-	
+
 	private void rotateTarget(int r) {
 		ImageView v = (ImageView) findViewById(R.id.target);
 		if (v.getVisibility() == VISIBLE) {
@@ -117,7 +117,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			angle = (360 + angle+r) % 360;
 		}
 	}
-	
+
 	private void allInfoVisible(boolean b) {
 		int v = b ? INVISIBLE : VISIBLE;
 		((TextView) findViewById(R.id.result)).setVisibility(v);
@@ -129,26 +129,26 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 		((TextView) findViewById(R.id.qrcode_info)).setVisibility(v);
 		((TextView) findViewById(R.id.images_info)).setVisibility(v);
 	}
-	
-	
+
+
 	//-----------------------
 	// ScanActivity.Listener
 	//-----------------------
 	@Override
 	public void onStatusUpdate(Bundle status) {
 		if (status.getBoolean("ready")) {
-			
+
 			// update EAN info
 			boolean ean8 = status.getBoolean("decode_ean_8");
 			boolean ean13 = status.getBoolean("decode_ean_13");
 			eanInfo(ean8, ean13);
-			
+
 			// update QR codes info
 			qrInfo(status.getBoolean("decode_qrcode"));
-			
+
 			// update images info
 			imagesInfo(status.getInt("images"), status.getBoolean("syncing"));
-			
+
 			// display result
 			Bundle result = status.getBundle("result");
 			if (result != null) {
@@ -159,26 +159,26 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 				displayResult("");
 				allInfoVisible(true);
 			}
-			
+
 		}
 	}
-	
+
 	//------------------------------
 	// OrientationListener.Callback
 	//------------------------------
-	
+
 	@Override
 	public void onOrientationChanged(int o) {
 		int diff = (4 + o - ori)%4;
 		int r;
 		switch(diff) {
-			case 1: r = -90;
-							break;
-			case 2: r = 180;
-							break;
-			case 3: r = 90;
-							break;
-			default: return;
+		case 1: r = -90;
+		break;
+		case 2: r = 180;
+		break;
+		case 3: r = 90;
+		break;
+		default: return;
 		}
 		rotateTarget(r);
 		ori = o;
