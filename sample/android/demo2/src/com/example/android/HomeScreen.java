@@ -39,8 +39,28 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			});
 			builder.show();
 		} catch (MoodstocksError e) {
-			e.log(Log.ERROR);
-			finish();
+			if (e.getErrorCode() == MoodstocksError.Code.CREDMISMATCH) {
+				// == DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
+				String errmsg = "there is a problem with your key/secret pair: "+
+						"the current pair does NOT match with the one recorded within the on-disk datastore. "+
+						"This could happen if:\n"+
+						" * you have first build & run the app without replacing the default"+
+						" \"ApIkEy\" and \"ApIsEcReT\" pair, and later on replaced with your real key/secret,\n"+
+						" * or, you have first made a typo on the key/secret pair, build & run the"+
+						" app, and later on fixed the typo and re-deployed.\n"+
+						"\n"+
+						"To solve your problem:\n"+
+						" 1) uninstall the app from your device,\n"+
+						" 2) make sure to properly configure your key/secret pair within Scanner.java\n"+
+						" 3) re-build & run\n";
+				MoodstocksError err = new MoodstocksError(errmsg, MoodstocksError.Code.CREDMISMATCH);
+				err.log(Log.ERROR);
+				finish();
+				// == DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
+			}
+			else {
+				e.log(Log.ERROR);
+			}
 		}
 	}
 
