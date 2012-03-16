@@ -116,6 +116,7 @@ public class CameraManager implements SurfaceHolder.Callback, Camera.PreviewCall
 		for (Size s : prev_sizes) {
 			int w = s.width;
 			int h = s.height;
+			if (w > 1280 || h > 1280) continue;
 			float r = (float)w/(float)h;
 			if (((r-ratio)*(r-ratio))/(ratio*ratio) < 0.01 && w > best_w) {
 				best_w = w;
