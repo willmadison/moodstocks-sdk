@@ -120,12 +120,6 @@ public class ScanActivity extends Activity implements Scanner.SyncListener, Scan
 			} catch (MoodstocksError e) {
 				e.log(Log.ERROR);
 			}
-			// request first frame if ready.
-			// otherwise (initial sync), it will be
-			// requested after sync is finished.
-			if (status.getBoolean("ready")) {
-				CameraManager.get().requestNewFrame();
-			}
 		}
 	}	
 

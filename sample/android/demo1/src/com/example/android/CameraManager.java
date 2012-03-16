@@ -1,6 +1,7 @@
 package com.example.android;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.util.Log;
@@ -13,7 +14,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 
-public class CameraManager implements SurfaceHolder.Callback {
+public class CameraManager implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
 	public static interface Listener extends Camera.PreviewCallback {
 
@@ -22,6 +23,8 @@ public class CameraManager implements SurfaceHolder.Callback {
 
 	}
 
+
+
 	public static final String TAG = "CameraManager";
 
 	private static CameraManager instance = null;
@@ -29,6 +32,7 @@ public class CameraManager implements SurfaceHolder.Callback {
 	private Camera cam;
 	private SurfaceHolder preview;
 	private AutoFocusManager focus_manager;
+	private List<Size> banned;
 
 	private int preview_width;
 	private int preview_height;
@@ -36,6 +40,8 @@ public class CameraManager implements SurfaceHolder.Callback {
 
 	private CameraManager() {
 		super();
+		banned = new ArrayList<Size>();
+		banned.clear();
 	}
 
 	public static CameraManager get() {
@@ -60,7 +66,9 @@ public class CameraManager implements SurfaceHolder.Callback {
 		preview.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		preview.addCallback(this);
 		findBestPreviewSize();
-		cam.setPreviewCallbackWithBuffer(listener);
+		cam.setPreviewCallback(this);
+		// adapt preview orientation or portrait mode
+		cam.setDisplayOrientation(90);
 		focus_manager = new AutoFocusManager(cam);
 		return true;
 	}
@@ -100,6 +108,9 @@ public class CameraManager implements SurfaceHolder.Callback {
 		float ratio = (float)display.getHeight()/(float)display.getWidth();
 		// available preview sizes:
 		List<Size> prev_sizes = params.getSupportedPreviewSizes();
+		for (Size s : banned) {
+			prev_sizes.remove(s);
+		}
 		int best_w = 0;
 		int best_h = 0;
 		for (Size s : prev_sizes) {
@@ -129,8 +140,6 @@ public class CameraManager implements SurfaceHolder.Callback {
 		// we force the preview format to NV21
 		params.setPreviewFormat(ImageFormat.NV21);
 		cam.setParameters(params);
-		// adapt preview orientation or portrait mode
-		cam.setDisplayOrientation(90);
 		// pre-allocate buffer of size #pixels x 3/2
 		// as NV21 uses #pixels for grayscale and twice
 		// #pixels/4 for chroma.
@@ -161,6 +170,27 @@ public class CameraManager implements SurfaceHolder.Callback {
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// void implementation
+	}
+
+	/*******************************************************************
+	 * UGLY HACK due to some problems on older devices and custom ROMs
+	 * (e.g. HTC Desire Bravo + Cyanogenmod 7.1):
+	 * In some cases, Camera.getSupportedPreviewSizes() returns sizes
+	 * that are *not* available.
+	 * This checks that the chosen resolution is indeed available, and
+	 * chooses another one if it's not.
+	 *******************************************************************/
+	@Override
+	public void onPreviewFrame(byte[] data, Camera camera) {
+		if (data.length != 3*preview_width*preview_height/2) {
+			Size s = cam.new Size(preview_width,preview_height);
+			banned.add(s);
+			findBestPreviewSize();
+		}
+		else {
+			cam.setPreviewCallbackWithBuffer(listener);
+			requestNewFrame();
+		}
 	}
 
 }

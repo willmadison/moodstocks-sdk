@@ -57,7 +57,6 @@ public class ScanActivity extends Activity implements CameraManager.Listener, Vi
 		status.putBoolean("searching", false);
 		status.putBundle("result", null);
 		overlay.onStatusUpdate(status);
-		CameraManager.get().requestNewFrame();
 	}
 
 	@Override
