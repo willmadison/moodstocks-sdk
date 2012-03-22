@@ -3,4 +3,6 @@
     <string name="app_name">Demo1</string>
     <string name="info1">One object/barcode at a time</string>
     <string name="info2">Place it upright</string>
+    <string name="home_scan">Scan</string>
+    <string name="scan_name">ScanActivity</string>
 </resources>

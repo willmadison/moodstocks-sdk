@@ -64,11 +64,10 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			qr_info = new String(s);
 		}
 	}
-
-	private void imagesInfo(int count, boolean sync) {
+	
+	private void imagesInfo(int count) {
 		TextView tv = (TextView) findViewById(R.id.images_info);
 		String s = "[X] "+count+" images";
-		if (sync) s += " (syncing...)";
 		if (!s.equals(images_info)) {
 			tv.setText(s);
 			images_info = new String(s);
@@ -136,30 +135,27 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	//-----------------------
 	@Override
 	public void onStatusUpdate(Bundle status) {
-		if (status.getBoolean("ready")) {
-
-			// update EAN info
-			boolean ean8 = status.getBoolean("decode_ean_8");
-			boolean ean13 = status.getBoolean("decode_ean_13");
-			eanInfo(ean8, ean13);
-
-			// update QR codes info
-			qrInfo(status.getBoolean("decode_qrcode"));
-
-			// update images info
-			imagesInfo(status.getInt("images"), status.getBoolean("syncing"));
-
-			// display result
-			Bundle result = status.getBundle("result");
-			if (result != null) {
-				displayResult(result.getString("value"));
-				allInfoVisible(false);
-			}
-			else {
-				displayResult("");
-				allInfoVisible(true);
-			}
-
+			
+		// update EAN info
+		boolean ean8 = status.getBoolean("decode_ean_8");
+		boolean ean13 = status.getBoolean("decode_ean_13");
+		eanInfo(ean8, ean13);
+		
+		// update QR codes info
+		qrInfo(status.getBoolean("decode_qrcode"));
+		
+		// update images info
+		imagesInfo(status.getInt("images"));
+		
+		// display result
+		Bundle result = status.getBundle("result");
+		if (result != null) {
+			displayResult(result.getString("value"));
+			allInfoVisible(false);
+		}
+		else {
+			displayResult("");
+			allInfoVisible(true);
 		}
 	}
 
@@ -172,13 +168,13 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 		int diff = (4 + o - ori)%4;
 		int r;
 		switch(diff) {
-		case 1: r = -90;
-		break;
-		case 2: r = 180;
-		break;
-		case 3: r = 90;
-		break;
-		default: return;
+			case 1: r = -90;
+							break;
+			case 2: r = 180;
+							break;
+			case 3: r = 90;
+							break;
+			default: return;
 		}
 		rotateTarget(r);
 		ori = o;
