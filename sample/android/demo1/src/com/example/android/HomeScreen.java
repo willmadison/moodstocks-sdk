@@ -21,6 +21,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	private ProgressDialog progress;
 	private boolean ready = false;
 	private boolean syncing = false;
+	private boolean compatible = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -28,10 +29,28 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 		setContentView(R.layout.home);
 		findViewById(R.id.scan_button).setOnClickListener(this);
 		try {
+			/* open the scanner, necessary to perform any operation using it.
+			 * This step also checks at runtime that the device is compatible.
+			 * You *must* implement a try/catch(UnsupportedDeviceException) and
+			 * abort using the scanner if an Exception is returned, otherwise
+			 * it may crash. See example below.
+			 */
 			Scanner.get().open(this, "ms.db");
-			if (Scanner.get().count() != 0) ready = true;
+			/* At this point, we check that the database is not empty. If it is,
+			 * we guess sync() was never called and make a first (blocking) call
+			 * to ensure that the scanner activity is not shown to the user until
+			 * there is scanning content available. If it's not empty, we make a
+			 * non-blocking call to it to update database at application startup.
+			 * (see Scanner.SyncListener implementation below).
+			 */
+			if (Scanner.get().count() != 0) ready = true; 
 			Scanner.get().sync(this);
 		} catch (UnsupportedDeviceException e) {
+			/* device is *not* compatible. In this demo application, we chose
+			 * to inform the user and exit application. `compatible` flag is here
+			 * to avoid calling scanner methods that *will* fail and log errors. 
+			 */
+			compatible = false;
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setCancelable(false);
 			builder.setTitle("Unsupported device!");
@@ -48,6 +67,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			});
 			builder.show();
 		} catch (MoodstocksError e) {
+			/* an error occurred while opening the scanner */
 			if (e.getErrorCode() == MoodstocksError.Code.CREDMISMATCH) {
 				// == DO NOT USE IN PRODUCTION: THIS IS A HELP MESSAGE FOR DEVELOPERS
 				String errmsg = "there is a problem with your key/secret pair: "+
@@ -76,16 +96,26 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		try {
-			Scanner.get().close();
-		} catch (MoodstocksError e) {
-			e.log(Log.ERROR);
+		if (compatible) {
+			try {
+				/* you must close the scanner before exiting */
+				Scanner.get().close();
+			} catch (MoodstocksError e) {
+				e.log(Log.ERROR);
+			}
 		}
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (v == findViewById(R.id.scan_button)) {
+			/* As an example, we call sync() whenever the scanner activity is launched.
+			 * In a real app context, it is your responsibility to place it wisely and
+			 * ensure that it is called often enough to keep your users up-to-date.
+			 * If your app has its own data synchronization process somewhere, we encourage
+			 * you to call sync() at the same time.
+			 */
+			if (!syncing) Scanner.get().sync(this);
 			// launch scanner
 			startActivity(new Intent(this, ScanActivity.class));
 		}
@@ -99,7 +129,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	public void onSyncStart() {
 		syncing = true;
 		if (!ready) {
-			// initial sync
+			/* initial sync: show a blocking view while syncing */
 			progress = ProgressDialog.show(this, null, "Syncing...");
 			TextView tv = (TextView)progress.findViewById(android.R.id.message);
 			tv.setTextSize(20);
@@ -111,6 +141,7 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	public void onSyncComplete() {
 		syncing = false;
 		if (!ready) {
+			/* discard blocking view at initial sync */
 			progress.dismiss();
 			ready = true;
 		}
@@ -120,8 +151,13 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	public void onSyncFailed(MoodstocksError e) {
 		syncing = false;
 		if (!ready) {
+			/* discard blocking view at initial sync */
 			progress.dismiss();
 			ready = true;
+			/* if an error occurred during the initial sync, we chose to notify 
+			 * the user as the database is still empty and the scanner won't work
+			 * as it should.
+			 */
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Network Error!");
 			builder.setMessage(e.getMessage());
