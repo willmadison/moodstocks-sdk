@@ -24,6 +24,7 @@
 		82A165A8149907C200B8AEB4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 82A165A7149907C200B8AEB4 /* main.m */; };
 		82A165AC149907C200B8AEB4 /* MSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 82A165AB149907C200B8AEB4 /* MSAppDelegate.m */; };
 		82DEE69914991D97002BA5B0 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 82DEE69814991D97002BA5B0 /* Default.png */; };
+		82E7F44F151CC51700B1DC34 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 82E7F44E151CC51700B1DC34 /* RootViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,8 @@
 		82A165AA149907C200B8AEB4 /* MSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAppDelegate.h; sourceTree = "<group>"; };
 		82A165AB149907C200B8AEB4 /* MSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSAppDelegate.m; sourceTree = "<group>"; };
 		82DEE69814991D97002BA5B0 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		82E7F44D151CC51700B1DC34 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
+		82E7F44E151CC51700B1DC34 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +156,8 @@
 				82A165AA149907C200B8AEB4 /* MSAppDelegate.h */,
 				82A165AB149907C200B8AEB4 /* MSAppDelegate.m */,
 				82A165A2149907C200B8AEB4 /* Supporting Files */,
+				82E7F44D151CC51700B1DC34 /* RootViewController.h */,
+				82E7F44E151CC51700B1DC34 /* RootViewController.m */,
 			);
 			path = Demo1;
 			sourceTree = "<group>";
@@ -242,6 +247,7 @@
 				822B28C8149914C3001A7DD1 /* MBProgressHUD.m in Sources */,
 				822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */,
 				822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */,
+				82E7F44F151CC51700B1DC34 /* RootViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

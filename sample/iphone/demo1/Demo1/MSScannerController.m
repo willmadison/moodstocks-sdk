@@ -31,9 +31,6 @@
 #include "moodstocks_sdk.h"
 
 #if MS_SDK_REQUIREMENTS
-/* Auto-sync feature (when app starts or re-enters foreground) */
-static const BOOL kMSScannerAutoSync = YES;
-
 /**
  * Enabled scanning formats
  * Here we allow offline image recognition as well as EAN13 and QRCodes barcode decoding.
@@ -42,6 +39,11 @@ static const BOOL kMSScannerAutoSync = YES;
 static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
                                   MS_RESULT_TYPE_EAN13 |
                                   MS_RESULT_TYPE_QRCODE;
+
+/* Do not modify */
+static void ms_avcapture_cleanup(void *p) {
+    [((MSScannerController *) p) release];
+}
 #endif
 
 /* Private stuff */
@@ -51,24 +53,18 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
 - (void)deviceOrientationDidChange;
 - (AVCaptureDevice *)cameraWithPosition:(AVCaptureDevicePosition)position;
 - (AVCaptureDevice *)backFacingCamera;
-+ (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections;
-
-- (void)applicationDidEnterBackground;
-- (void)applicationWillEnterForeground;
 #endif
 
 - (void)startCapture;
 - (void)stopCapture;
 
-- (void)sync;
-- (void)backgroundSync;
+- (void)dismissAction;
 
 @end
 
 
 @implementation MSScannerController
 
-@synthesize videoPreviewView = _videoPreviewView;
 #if MS_SDK_REQUIREMENTS
 @synthesize captureSession;
 @synthesize previewLayer;
@@ -79,10 +75,20 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.navigationItem.title = @"AR Sample";
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
-                                                                                                target:self
-                                                                                                action:@selector(backgroundSync)] autorelease];
+        UIBarButtonItem *barButton = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                                    target:self
+                                                                                    action:@selector(dismissAction)] autorelease];
+        self.navigationItem.leftBarButtonItem = barButton;
+
+#if MS_SDK_REQUIREMENTS
+        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(deviceOrientationDidChange)
+                                                     name:UIDeviceOrientationDidChangeNotification
+                                                   object:nil];
+        self.orientation = AVCaptureVideoOrientationPortrait;
+#endif
+        
         _overlayController = [[MSOverlayController alloc] init];
         _processFrames = NO;
         _ts = -1;
@@ -90,15 +96,17 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
     return self;
 }
 
-- (void)dealloc
-{
-    [self stopCapture];
-    
+- (void)dealloc {
     [_overlayController release];
     _overlayController = nil;
     
     [_result release];
     _result = nil;
+    
+#if MS_SDK_REQUIREMENTS
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+#endif
     
     [super dealloc];
 }
@@ -133,88 +141,32 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
 - (AVCaptureDevice *)backFacingCamera {
     return [self cameraWithPosition:AVCaptureDevicePositionBack];
 }
-
-+ (AVCaptureConnection *)connectionWithMediaType:(NSString *)mediaType fromConnections:(NSArray *)connections {
-    for ( AVCaptureConnection *connection in connections ) {
-		for ( AVCaptureInputPort *port in [connection inputPorts] ) {
-			if ( [[port mediaType] isEqual:mediaType] ) {
-				return connection;
-			}
-		}
-	}
-    
-	return nil;
-}
-
-- (void)applicationDidEnterBackground {
-    // Nothing to do so far
-}
-
-- (void)applicationWillEnterForeground {
-    if (!kMSScannerAutoSync) return;
-    
-    [self backgroundSync];
-}
 #endif
 
 - (void)startCapture {
-#if MS_SDK_REQUIREMENTS
-    // == SYNC & OVERLAY INITIALIZATION
-    NSInteger count = [[MSScanner sharedInstance] count:nil];
-    if (count <= 0)
-        [self sync];
-    else {
-        if (kMSScannerAutoSync) [self backgroundSync];
-            
-        NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
-                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN8)],   @"decode_ean_8",
-                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN13)],  @"decode_ean_13",
-                               [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_QRCODE)], @"decode_qrcode",
-                               [NSNumber numberWithInteger:count],                                   @"images", nil];
-        [_overlayController scanner:self stateUpdated:state];
-        _processFrames = YES;
-    }
-    
-    // == NOTIFICATIONS SETUP
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
-    self.orientation = AVCaptureVideoOrientationPortrait;
-    
-    // == CAMERA SETUP
-	if ([[self backFacingCamera] hasFlash]) {
-		if ([[self backFacingCamera] lockForConfiguration:nil]) {
-			if ([[self backFacingCamera] isFlashModeSupported:AVCaptureFlashModeAuto])
-                [[self backFacingCamera] setFlashMode:AVCaptureFlashModeAuto];
-			[[self backFacingCamera] unlockForConfiguration];
-		}
-	}
-    
-	if ([[self backFacingCamera] hasTorch]) {
-		if ([[self backFacingCamera] lockForConfiguration:nil]) {
-			if ([[self backFacingCamera] isTorchModeSupported:AVCaptureTorchModeAuto])
-                [[self backFacingCamera] setTorchMode:AVCaptureTorchModeAuto];
-			[[self backFacingCamera] unlockForConfiguration];
-		}
-	}
-    
+#if MS_SDK_REQUIREMENTS    
     // == CAPTURE SESSION SETUP
-    AVCaptureDeviceInput* newVideoInput            = [[AVCaptureDeviceInput alloc] initWithDevice:[self backFacingCamera] error:nil];
-    AVCaptureVideoDataOutput *newCaptureOutput     = [[AVCaptureVideoDataOutput alloc] init];
-    newCaptureOutput.alwaysDiscardsLateVideoFrames = YES; 
-    videoDataOutputQueue = dispatch_queue_create("MSScannerController", DISPATCH_QUEUE_SERIAL);
-    [newCaptureOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
-    NSDictionary *outputSettings                   = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA]
-                                                                                 forKey:(id)kCVPixelBufferPixelFormatTypeKey];
-    [newCaptureOutput setVideoSettings:outputSettings];
+    AVCaptureDeviceInput *newVideoInput = [[AVCaptureDeviceInput alloc] initWithDevice:[self backFacingCamera] error:nil];
+    AVCaptureVideoDataOutput *newCaptureOutput = [[AVCaptureVideoDataOutput alloc] init];
     
-    AVCaptureSession* cSession = [[AVCaptureSession alloc] init];
+    dispatch_queue_t videoDataOutputQueue = dispatch_queue_create("MSScannerController", DISPATCH_QUEUE_SERIAL);
+    dispatch_set_context(videoDataOutputQueue, self);
+    dispatch_set_finalizer_f(videoDataOutputQueue, ms_avcapture_cleanup);
+    [newCaptureOutput setSampleBufferDelegate:self queue:videoDataOutputQueue];
+    dispatch_release(videoDataOutputQueue);
+    [self retain]; /* a release is made at `ms_avcapture_cleanup` time */
+    
+    NSDictionary *outputSettings = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA]
+                                                               forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+    [newCaptureOutput setVideoSettings:outputSettings];
+    [newCaptureOutput setAlwaysDiscardsLateVideoFrames:YES];
+    
+    AVCaptureSession *cSession = [[AVCaptureSession alloc] init];
     self.captureSession = cSession;
     [cSession release];
     
     // == FRAMES RESOLUTION
-    // These are recommended settings: do not change
+    // NOTE: these are recommended settings, do *NOT* change
     if ([self.captureSession canSetSessionPreset:AVCaptureSessionPreset1280x720])
         [self.captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
     
@@ -240,18 +192,34 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
     if (!self.previewLayer)
         self.previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.captureSession];
     
-    CALayer* viewLayer = [_videoPreviewView layer];
-    [viewLayer setMasksToBounds:YES];
+    UIView *videoPreviewView = nil;
+    for (UIView *v in [self.view subviews]) {
+        if ([v tag] == 1) {
+            videoPreviewView = v;
+            
+            CALayer *viewLayer = [videoPreviewView layer];
+            [viewLayer setMasksToBounds:YES];
+            [self.previewLayer setFrame:[videoPreviewView bounds]];
+            if ([self.previewLayer isOrientationSupported])
+                [self.previewLayer setOrientation:AVCaptureVideoOrientationPortrait];
+            [self.previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+            [viewLayer insertSublayer:self.previewLayer below:[[viewLayer sublayers] objectAtIndex:0]];
+            
+            break;
+        }
+    }
     
-    [self.previewLayer setFrame:[_videoPreviewView bounds]];
+    [self.captureSession startRunning];
     
-    if ([self.previewLayer isOrientationSupported])
-        [self.previewLayer setOrientation:AVCaptureVideoOrientationPortrait];
-    [self.previewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    // == OVERLAY NOTIFICATION
+    NSDictionary *state = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], @"ready",
+                           [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN8)],      @"decode_ean_8",
+                           [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN13)],     @"decode_ean_13",
+                           [NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_QRCODE)],    @"decode_qrcode",
+                           [NSNumber numberWithInteger:[[MSScanner sharedInstance] count:nil]],     @"images", nil];
+    [_overlayController scanner:self stateUpdated:state];
     
-    [viewLayer insertSublayer:self.previewLayer below:[[viewLayer sublayers] objectAtIndex:0]];
-    
-    [self.captureSession startRunning];    
+    _processFrames = YES;
 #endif
 }
 
@@ -259,24 +227,16 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
 #if MS_SDK_REQUIREMENTS
     [captureSession stopRunning];
     
-    AVCaptureInput* input = [captureSession.inputs objectAtIndex:0];
+    AVCaptureInput *input = [captureSession.inputs objectAtIndex:0];
     [captureSession removeInput:input];
     
-    AVCaptureVideoDataOutput* output = (AVCaptureVideoDataOutput*) [captureSession.outputs objectAtIndex:0];
+    AVCaptureVideoDataOutput *output = (AVCaptureVideoDataOutput*) [captureSession.outputs objectAtIndex:0];
     [captureSession removeOutput:output];
-    
-    if (videoDataOutputQueue)
-		dispatch_release(videoDataOutputQueue);
     
     [self.previewLayer removeFromSuperlayer];
     
     self.previewLayer = nil;
     self.captureSession = nil;
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
-    [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
 #endif
 }
 
@@ -288,23 +248,22 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
         return;
     
     // -------------------------------------------------
-    // Frame conversion
+    // Camera frame conversion
     // -------------------------------------------------
     MSImage *qry = [[MSImage alloc] initWithBuffer:sampleBuffer orientation:self.orientation];
     
     // -------------------------------------------------
-    // Scan
+    // Scanning
     // -------------------------------------------------
     NSError *err = nil;
     MSResult *result = [[MSScanner sharedInstance] scan:qry options:kMSScanOptions error:&err];
     if (err != nil) {
-        ms_errcode ecode = [err code];
-        NSString *errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-        MSDLog(@" SCAN ERROR: %@", errStr);
+        MSDLog(@" [MOODSTOCKS SDK] SCAN ERROR: %@", [NSString stringWithCString:ms_errmsg([err code])
+                                                                       encoding:NSUTF8StringEncoding]);
     }
     
     // -------------------------------------------------
-    // Notify the overlay
+    // Overlay refreshing
     // -------------------------------------------------
     if (result != nil) {
         _ts = [[NSDate date] timeIntervalSince1970];
@@ -322,6 +281,8 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
         }
     }
     else if (_ts > 0) {
+        // Here we control how long the overlay will persist on screen when no result is found
+        // by the scanner. Feel free to configure this delay according to your needs
         NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
         if (now - _ts >= 1.5 /* seconds */) {
             // This UI action must be dispatched into the main thread
@@ -347,12 +308,15 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
 - (void)loadView {
     [super loadView];
     
-    _videoPreviewView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-    _videoPreviewView.backgroundColor = [UIColor blackColor];
-    _videoPreviewView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-    _videoPreviewView.autoresizesSubviews = YES;
-    [self.view addSubview:_videoPreviewView];
+    CGRect previewFrame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    UIView *videoPreviewView = [[[UIView alloc] initWithFrame:previewFrame] autorelease];
+    videoPreviewView.tag = 1; /* to identify the video preview view */
+    videoPreviewView.backgroundColor = [UIColor blackColor];
+    videoPreviewView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    videoPreviewView.autoresizesSubviews = YES;
+    [self.view addSubview:videoPreviewView];
     
+    [_overlayController.view setTag:2];
     [_overlayController.view setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
     [self.view addSubview:_overlayController.view];
 }
@@ -366,89 +330,18 @@ static NSInteger kMSScanOptions = MS_RESULT_TYPE_IMAGE |
     [self startCapture];
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    
-    [_videoPreviewView release];
-    _videoPreviewView = nil;
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-#pragma mark - Synchronization
+#pragma mark - Actions
 
-- (void)sync {
-#if MS_SDK_REQUIREMENTS
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    [hud setLabelText:@"Syncing"];
-    [[MSScanner sharedInstance] syncWithDelegate:self];
-#endif
-}
-
-- (void)backgroundSync {
-#if MS_SDK_REQUIREMENTS
-    MSScanner *scanner = [MSScanner sharedInstance];
-    if (![scanner isSyncing]) {
-        [scanner syncWithDelegate:self];
-    }
-#endif
-}
-
-#pragma mark - MSScannerDelegate
-
-#if MS_SDK_REQUIREMENTS
--(void)scannerWillSync:(MSScanner *)scanner {
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+- (void)dismissAction {
+    [self stopCapture];
     
-    NSInteger count = [[MSScanner sharedInstance] count:nil];
-    NSMutableDictionary *state = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"syncing"];
-    [state setValue:[NSNumber numberWithInteger:count] forKey:@"images"];
-    [_overlayController scanner:self stateUpdated:state];
+    [self dismissModalViewControllerAnimated:YES];
 }
-
-- (void)scannerDidSync:(MSScanner *)scanner {
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
-    
-    NSInteger count = [[MSScanner sharedInstance] count:nil];
-    NSMutableDictionary *state = [NSMutableDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:@"syncing"];
-    [state setValue:[NSNumber numberWithInteger:count] forKey:@"images"];
-    if (_processFrames == NO) {
-        [state setValue:[NSNumber numberWithBool:YES] forKey:@"ready"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN8)]   forKey:@"decode_ean_8"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_EAN13)]  forKey:@"decode_ean_13"];
-        [state setValue:[NSNumber numberWithBool:!!(kMSScanOptions & MS_RESULT_TYPE_QRCODE)] forKey:@"decode_qrcode"];
-        _processFrames = YES;
-    }
-    [_overlayController scanner:self stateUpdated:state];
-}
-
-- (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error {
-    [self scannerDidSync:scanner];
-    
-    ms_errcode ecode = [error code];
-    // NOTE: ignore negative error codes which are not returned by the SDK
-    //       but application specific (e.g. so far -1 is returned when cancelling)
-    if (ecode >= 0) {
-        NSString *errStr;
-        if (ecode == MS_BUSY)
-            errStr = @"A sync is pending";
-        else
-            errStr = [NSString stringWithCString:ms_errmsg(ecode) encoding:NSUTF8StringEncoding];
-        
-        [[[[UIAlertView alloc] initWithTitle:@"Sync error"
-                                     message:errStr
-                                    delegate:nil
-                           cancelButtonTitle:@"OK"
-                           otherButtonTitles:nil] autorelease] show];
-    }
-}
-#endif
 
 @end

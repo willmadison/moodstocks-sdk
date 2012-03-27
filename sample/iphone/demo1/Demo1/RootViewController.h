@@ -23,43 +23,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import "MSAvailability.h"
-
-#if MS_SDK_REQUIREMENTS
-  #import <AVFoundation/AVFoundation.h>
-#endif
-
 #import "MSScanner.h"
 
-@protocol MSScannerOverlayDelegate;
-@class MSOverlayController;
-
-@interface MSScannerController : UIViewController
-#if MS_SDK_REQUIREMENTS
-<AVCaptureVideoDataOutputSampleBufferDelegate
->
-#endif
-{
-    MSOverlayController *_overlayController;
-#if MS_SDK_REQUIREMENTS
-    AVCaptureSession*           captureSession;
-    AVCaptureVideoPreviewLayer *previewLayer;
-    AVCaptureVideoOrientation   orientation;
-#endif
-    BOOL _processFrames;      // frames processing enabled / disabled
-    MSResult *_result;        // previous result
-    NSTimeInterval _ts;       // timestamp of the latest result found
-}
-
-#if MS_SDK_REQUIREMENTS
-@property (nonatomic, retain) AVCaptureSession *captureSession;
-@property (nonatomic, retain) AVCaptureVideoPreviewLayer *previewLayer;
-@property (nonatomic, assign) AVCaptureVideoOrientation orientation;
-#endif
+@interface RootViewController : UIViewController <MSScannerDelegate>
 
 @end
-
-@protocol MSScannerOverlayDelegate <NSObject>
-- (void)scanner:(MSScannerController *)scanner stateUpdated:(NSDictionary *)state;
-@end
-

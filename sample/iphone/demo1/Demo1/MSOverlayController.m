@@ -47,7 +47,7 @@ static const NSInteger kMSInfoFontSize   = 14;
 - (UILabel *)getLabelWithTag:(NSInteger)tag;
 - (void)updateEAN;
 - (void)updateQRCode;
-- (void)updateImages:(NSInteger)count syncing:(BOOL)sync;
+- (void)updateImages:(NSInteger)count;
 
 @end
 
@@ -404,14 +404,13 @@ static const NSInteger kMSInfoFontSize   = 14;
     }
 }
 
-- (void)updateImages:(NSInteger)count syncing:(BOOL)sync {
+- (void)updateImages:(NSInteger)count {
     UILabel * label = [self getLabelWithTag:2];
     
     if (label != nil) {
-        NSString *text = [NSString stringWithFormat:@" [✔] %d %@ %@",
+        NSString *text = [NSString stringWithFormat:@" [✔] %d %@",
                           count,
-                          (count > 1 ? @"images" : @"image"),
-                          sync ? @"(syncing...) " : @""];
+                          (count > 1 ? @"images" : @"image")];
         
         UIFont *font = [UIFont systemFontOfSize:kMSInfoFontSize];
         UILineBreakMode breakMode = UILineBreakModeWordWrap;
@@ -454,9 +453,8 @@ static const NSInteger kMSInfoFontSize   = 14;
     NSNumber *images = (NSNumber *) [state objectForKey:@"images"];
     if (images != nil)
         self.imagesCount = [images integerValue];
-    NSNumber *syncing = (NSNumber *) [state objectForKey:@"syncing"];
-    if (images != nil || syncing != nil) {
-        [self updateImages:self.imagesCount syncing:[syncing boolValue]];
+    if (images != nil) {
+        [self updateImages:self.imagesCount];
     }
     
     // Update result

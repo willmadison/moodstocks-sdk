@@ -25,7 +25,7 @@
 
 #import "MSDebug.h"
 #import "MSScanner.h"
-#import "MSScannerController.h"
+#import "RootViewController.h"
 
 @implementation MSAppDelegate
 
@@ -89,7 +89,7 @@
         }
 #endif
         
-        MSScannerController *rootViewController = [[[MSScannerController alloc] init] autorelease];
+        RootViewController *rootViewController = [[[RootViewController alloc] init] autorelease];
         self.navigationController = [[[UINavigationController alloc] initWithRootViewController:rootViewController] autorelease];
         [self.window addSubview:self.navigationController.view];
     }
