@@ -1,0 +1,5 @@
+Demo.xcodeproj/*.pbxuser
+Demo.xcodeproj/*.mode*
+Demo.xcodeproj/*.perspectivev3
+Demo.xcodeproj/*.xcworkspace/
+Demo.xcodeproj/xcuserdata/
