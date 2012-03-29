@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Demo2</string>
-    <string name="info1">Point to the object or barcode of interest.</string>
-    <string name="info2">If it takes too long, snap it.</string>
-    <string name="scan_name">ScanActivity</string>
-    <string name="home_scan">Scan</string>
-</resources>
