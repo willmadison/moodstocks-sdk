@@ -5,14 +5,18 @@ import com.moodstocks.android.*;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SlidingDrawer;
 import android.widget.TextView;
+import android.widget.ScrollView;
 
-public class Overlay extends RelativeLayout implements ScanActivity.Listener, OrientationListener.Callback {
+public class Overlay extends RelativeLayout 
+implements ScanActivity.Listener, OrientationListener.Callback, 
+SlidingDrawer.OnDrawerCloseListener, SlidingDrawer.OnDrawerOpenListener {
 
 	public static final String TAG = "Overlay";
 	private int angle = 0;
@@ -20,12 +24,18 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	private String ean_info = "";
 	private String qr_info = "";
 	private String images_info = "";
-	private String _result = "";
-	private Animation expand;
+	private SlidingDrawer drawer = null;
 
 	public Overlay(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		this.expand = AnimationUtils.loadAnimation(this.getContext(), R.anim.expand);
+	}
+
+	public void init() {
+		this.drawer = ((SlidingDrawer) findViewById(R.id.drawer));
+		this.drawer.setOnDrawerCloseListener(this);
+		this.drawer.setOnDrawerOpenListener(this);
+		((ScrollView) findViewById(R.id.scroll)).setSmoothScrollingEnabled(true);
+		allInfoVisible(true);
 	}
 
 	private void eanInfo(boolean ean8, boolean ean13) {
@@ -64,7 +74,7 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 			qr_info = new String(s);
 		}
 	}
-	
+
 	private void imagesInfo(int count) {
 		TextView tv = (TextView) findViewById(R.id.images_info);
 		String s = "[X] "+count+" images";
@@ -77,32 +87,11 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	private void displayResult(String result) {
 		TextView res = (TextView) findViewById(R.id.result);
 		res.setText(result);
-		if (result.equals("")) {
-			res.clearAnimation();
-			_result = "";
+		if (drawer.getVisibility() != View.VISIBLE) {
+			drawer.setVisibility(View.VISIBLE);
 		}
-		else if (!result.equals(_result)) {
-			res.startAnimation(expand);
-			_result = new String(result);
-		}
-	}
-
-	private void setTargetVisible(boolean b) {
-		ImageView v = (ImageView) findViewById(R.id.target);
-		if (b) {
-			if (ori == OrientationListener.Orientation.DOWN || 
-					ori == OrientationListener.Orientation.UP) {
-				v.setImageResource(R.drawable.target);
-			}
-			else {
-				v.setImageResource(R.drawable.target90);				
-			}
-			angle = 0;
-			v.setVisibility(VISIBLE);
-		}
-		else {
-			v.setVisibility(INVISIBLE);
-			v.clearAnimation();
+		if (!drawer.isOpened()) {
+			drawer.animateOpen();
 		}
 	}
 
@@ -118,15 +107,14 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	}
 
 	private void allInfoVisible(boolean b) {
-		int v = b ? INVISIBLE : VISIBLE;
-		((TextView) findViewById(R.id.result)).setVisibility(v);
-		v = b ? VISIBLE : INVISIBLE;
-		setTargetVisible(b);
+		int v = b ? VISIBLE : INVISIBLE;
 		((TextView) findViewById(R.id.info1)).setVisibility(v);
 		((TextView) findViewById(R.id.info2)).setVisibility(v);
 		((TextView) findViewById(R.id.ean_info)).setVisibility(v);
 		((TextView) findViewById(R.id.qrcode_info)).setVisibility(v);
 		((TextView) findViewById(R.id.images_info)).setVisibility(v);
+		int id = b ? android.R.drawable.arrow_up_float : android.R.drawable.arrow_down_float;
+		((ImageView) findViewById(R.id.handle)).setImageResource(id);
 	}
 
 
@@ -135,28 +123,24 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 	//-----------------------
 	@Override
 	public void onStatusUpdate(Bundle status) {
-			
+
 		// update EAN info
 		boolean ean8 = status.getBoolean("decode_ean_8");
 		boolean ean13 = status.getBoolean("decode_ean_13");
 		eanInfo(ean8, ean13);
-		
+
 		// update QR codes info
 		qrInfo(status.getBoolean("decode_qrcode"));
-		
+
 		// update images info
 		imagesInfo(status.getInt("images"));
-		
+
 		// display result
 		Bundle result = status.getBundle("result");
 		if (result != null) {
 			displayResult(result.getString("value"));
-			allInfoVisible(false);
 		}
-		else {
-			displayResult("");
-			allInfoVisible(true);
-		}
+		if (drawer.isOpened()) allInfoVisible(false);
 	}
 
 	//------------------------------
@@ -168,16 +152,29 @@ public class Overlay extends RelativeLayout implements ScanActivity.Listener, Or
 		int diff = (4 + o - ori)%4;
 		int r;
 		switch(diff) {
-			case 1: r = -90;
-							break;
-			case 2: r = 180;
-							break;
-			case 3: r = 90;
-							break;
-			default: return;
+		case 1: r = -90;
+		break;
+		case 2: r = 180;
+		break;
+		case 3: r = 90;
+		break;
+		default: return;
 		}
 		rotateTarget(r);
 		ori = o;
+	}
+
+	//-------------------------------------
+	// SlidingDrawer.OnDrawerListeners
+	//-------------------------------------
+	@Override
+	public void onDrawerClosed() {
+		allInfoVisible(true);
+	}
+
+	@Override
+	public void onDrawerOpened() {
+		allInfoVisible(false);
 	}
 
 }

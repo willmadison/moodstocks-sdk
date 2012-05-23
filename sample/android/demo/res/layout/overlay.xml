@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.example.android.Overlay xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#00000000"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#00000000" >
 
     <TextView
         android:id="@+id/ean_info"
@@ -12,11 +12,11 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="40dp"
         android:layout_marginTop="20dp"
+        android:background="#88000000"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:visibility="invisible"
-        android:background="#88000000"
-        android:text="" />
+        android:text=""
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/qrcode_info"
@@ -25,12 +25,12 @@
         android:layout_alignLeft="@id/ean_info"
         android:layout_below="@id/ean_info"
         android:layout_marginTop="4dp"
+        android:background="#88000000"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:visibility="invisible"
-        android:background="#88000000"
-        android:text="" />
-    
+        android:text=""
+        android:visibility="invisible" />
+
     <TextView
         android:id="@+id/images_info"
         android:layout_width="wrap_content"
@@ -38,63 +38,86 @@
         android:layout_alignLeft="@id/qrcode_info"
         android:layout_below="@id/qrcode_info"
         android:layout_marginTop="4dp"
+        android:background="#88000000"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:visibility="invisible"
-        android:background="#88000000"
-        android:text="" />
-	
+        android:text=""
+        android:visibility="invisible" />
+
     <!-- this View is here because layout_marginBottom bugs on info2 -->
+
     <View
         android:id="@+id/margin"
         android:layout_width="1dp"
-        android:layout_height="15dp"
-        android:visibility="invisible"
-        android:layout_alignParentBottom="true" />
-    
-	<TextView
-	    android:id="@+id/info2"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_above="@id/margin"
-	    android:layout_centerHorizontal="true"
-	    android:background="#88000000"
-	    android:paddingLeft="5dp"
-	    android:paddingRight="5dp"
-	    android:text="@string/info2"
-	    android:visibility="invisible" />
-	
-	<TextView
-	    android:id="@+id/info1"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_above="@id/info2"
-	    android:layout_marginBottom="4dp"
-	    android:layout_centerHorizontal="true"
-	    android:background="#88000000"
-	    android:paddingLeft="5dp"
-	    android:paddingRight="5dp"
-	    android:text="@string/info1"
-	    android:visibility="invisible" />
-
-	<ImageView
-	    android:id="@+id/target"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_centerHorizontal="true"
-	    android:layout_centerVertical="true"
-	    android:src="@drawable/target" />
-	
-	    
-    <TextView
-        android:id="@+id/result"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_alignParentBottom="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/info2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/margin"
         android:layout_centerHorizontal="true"
         android:background="#88000000"
-        android:visibility="invisible"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/info2"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/info1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/info2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="4dp"
+        android:background="#88000000"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/info1"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/target"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/target"
+        android:src="@drawable/target" />
+        
+    <SlidingDrawer
+        android:id="@+id/drawer"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+		android:layout_alignParentBottom="true"
+        android:content="@+id/scroll"
+        android:handle="@+id/handle"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:id="@+id/handle"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@drawable/handle" />
+		
+        <ScrollView
+            android:id="@+id/scroll"
+           	android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+	        android:background="@color/background"
+            android:fadingEdge="none" >
+	        <TextView
+	            android:id="@+id/result"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:autoLink="web|email"
+	            android:text=""
+	            android:textAppearance="?android:attr/textAppearanceLarge"
+	            android:scrollbars="vertical" />
+	    </ScrollView>
+	    
+    </SlidingDrawer>
 
 </com.example.android.Overlay>
