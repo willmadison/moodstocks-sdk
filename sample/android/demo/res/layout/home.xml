@@ -15,6 +15,12 @@
         android:clickable="true"
         android:text="@string/home_scan" />
 
+    <include layout="@layout/splash"
+        android:id="@+id/splash"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="invisible" />
+        
     <TextView
         android:id="@+id/title"
         android:layout_width="fill_parent"

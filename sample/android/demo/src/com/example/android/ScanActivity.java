@@ -7,10 +7,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.SlidingDrawer;
 
-public class ScanActivity extends Activity implements Scanner.ScanListener, CameraManager.Listener {
+public class ScanActivity extends Activity implements ScannerSession.ScanListener, CameraManager.Listener {
 
 	//-----------------------------------
 	// Interface implemented by overlays
@@ -19,7 +19,7 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 		public void onStatusUpdate(Bundle status);
 	}
 
-	// Enabled scanning types: configure it according to your needs
+	// Enabled scanning types: configure it according to your needs.
 	// Here we allow Image recognition, EAN13 and QRCodes decoding.
 	// Feel free to add `EAN8` if you want in addition to decode EAN-8.
 	private int ScanOptions = Result.Type.IMAGE | Result.Type.EAN13 | Result.Type.QRCODE;
@@ -29,23 +29,22 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 	private int preview_width;
 	private int preview_height;
 	private Scanner scanner;
+	private ScannerSession session;
 	private Overlay overlay;
 	private Bundle status;
-	private long last_found;
 	private Result _result = null;
-	private boolean compatible = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		scanner = Scanner.get();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		overlay = (Overlay) findViewById(R.id.overlay);
+		overlay.init();
 		OrientationListener.init(this);
 		status = new Bundle();
 		OrientationListener.get().enable();
@@ -53,8 +52,8 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 		SurfaceView surface = (SurfaceView) findViewById(R.id.preview);
 		boolean camera_success = CameraManager.get().start(this, surface);
 		if (!camera_success) finish();
-		scanner.setOptions(ScanOptions);
 		try {
+			scanner = Scanner.get();
 			int nb = scanner.count();
 			// get current status
 			status.putBoolean("decode_ean_8", (ScanOptions & Result.Type.EAN8) != 0);
@@ -66,17 +65,29 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 			overlay.onStatusUpdate(status);
 			// non-blocking sync 
 		} catch (MoodstocksError e) {
-			e.log(Log.ERROR);
+			e.log();
 		}
+		session = new ScannerSession(scanner);
+		session.setOptions(ScanOptions);
 	}	
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		if(compatible) {
-			Scanner.get().scanCancel();
-			OrientationListener.get().disable();
-			CameraManager.get().stop();
+		session.scanCancel();
+		OrientationListener.get().disable();
+		CameraManager.get().stop();
+		finish();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		SlidingDrawer drawer = (SlidingDrawer) findViewById(R.id.drawer);
+		if (drawer.isOpened()) {
+			drawer.animateClose();
+		}
+		else {
+			super.onBackPressed();
 		}
 	}
 
@@ -91,13 +102,15 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		scanner.scan(this, new Image(data, preview_width, preview_height, preview_width, OrientationListener.get().getOrientation()));
+		/* this is where the offline search/decoding is launched
+		 * using the video frames. 
+		 */
+		session.scan(this, new Image(data, preview_width, preview_height, preview_width, OrientationListener.get().getOrientation()));
 	}
 
 	//---------------------
 	// Scanner.ScanListener
 	//---------------------
-
 
 	@Override
 	public void onScanStart() {
@@ -117,7 +130,7 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 		 * not happen at runtime.
 		 */
 		if (e.getErrorCode() == MoodstocksError.Code.MISUSE) {
-			e.log(Log.ERROR);
+			e.log();
 			CameraManager.get().requestNewFrame();
 		}
 		else {
@@ -139,7 +152,6 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 	//-----------------
 	public void onResult(Result result) {
 		if (result != null) {
-			last_found = System.currentTimeMillis();
 			// necessary to update status? 
 			boolean update = false;
 			if (_result == null) {
@@ -159,18 +171,7 @@ public class ScanActivity extends Activity implements Scanner.ScanListener, Came
 				overlay.onStatusUpdate(status);
 			}
 		}
-		else {
-			// discard result if nothing is found for 1.5s
-			if (last_found > 0 && (System.currentTimeMillis() - last_found) > 1500 /*ms*/) {
-				_result = null;
-				last_found = -1;
-				status.putBundle("result", null);
-				overlay.onStatusUpdate(status);
-			}
-		}
 		CameraManager.get().requestNewFrame();
 	}
 	
-	
-
 }
