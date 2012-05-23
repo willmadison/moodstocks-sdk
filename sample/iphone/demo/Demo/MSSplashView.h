@@ -23,19 +23,14 @@
 
 #import <UIKit/UIKit.h>
 
-#import "MSScannerController.h"
-
-@class MSResultView;
-
-@interface MSOverlayController : UIViewController<MSScannerOverlayDelegate
-,UIActionSheetDelegate> {
-    MSScannerController *_scanner; // parent scanner
-    UIActionSheet *_actionSheet; // current overlay element
+@interface MSSplashView : UIView {
+    UILabel *_label;
+    UIActivityIndicatorView *_gear;
+    UIProgressView *_bar;
 }
 
-@property (nonatomic, assign) BOOL decodeEAN_8;
-@property (nonatomic, assign) BOOL decodeEAN_13;
-@property (nonatomic, assign) BOOL decodeQRCode;
-@property (nonatomic, assign) NSInteger imagesCount;
+@property (nonatomic, copy) NSString *text;
+@property (nonatomic) BOOL isAnimating;
+@property (nonatomic) float progress;
 
 @end

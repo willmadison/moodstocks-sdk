@@ -76,7 +76,7 @@
                 " 3) re-build & run\n";
                 MSDLog(@"\n\n [MOODSTOCKS SDK] SCANNER OPEN ERROR: %@", errStr);
                 
-                // NOTE: we purposely crash the app here so that the developer detect the problem
+                // NOTE: we purposely crash the app here so that the developer detects the problem
                 [[NSException exceptionWithName:@"MSScannerException"
                                          reason:@"Credentials mismatch"
                                        userInfo:nil] raise];

@@ -30,6 +30,7 @@
 #endif
 
 #import "MSScanner.h"
+#import "MSScannerSession.h"
 
 @protocol MSScannerOverlayDelegate;
 @class MSOverlayController;
@@ -45,10 +46,10 @@
     AVCaptureSession*           captureSession;
     AVCaptureVideoPreviewLayer *previewLayer;
     AVCaptureVideoOrientation   orientation;
+    MSScannerSession           *scannerSession;
 #endif
     BOOL _processFrames;      // frames processing enabled / disabled
     MSResult *_result;        // previous result
-    NSTimeInterval _ts;       // timestamp of the latest result found
 }
 
 #if MS_SDK_REQUIREMENTS
@@ -56,6 +57,9 @@
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *previewLayer;
 @property (nonatomic, assign) AVCaptureVideoOrientation orientation;
 #endif
+
+// Flush the last recognized result (if any)
+- (void)reset;
 
 @end
 

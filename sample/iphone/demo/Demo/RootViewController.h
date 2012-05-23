@@ -25,6 +25,10 @@
 
 #import "MSScanner.h"
 
-@interface RootViewController : UIViewController <MSScannerDelegate>
+#import "MSSplashView.h"
+
+@interface RootViewController : UIViewController <MSScannerDelegate> {
+    MSSplashView *_splashView;
+}
 
 @end

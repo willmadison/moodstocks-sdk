@@ -26,7 +26,6 @@
 #import "MSOverlayController.h"
 #import "MSDebug.h"
 #import "MSImage.h"
-#import "MBProgressHUD.h"
 
 #include "moodstocks_sdk.h"
 
@@ -87,11 +86,11 @@ static void ms_avcapture_cleanup(void *p) {
                                                      name:UIDeviceOrientationDidChangeNotification
                                                    object:nil];
         self.orientation = AVCaptureVideoOrientationPortrait;
+        scannerSession = [[MSScannerSession alloc] initWithScanner:[MSScanner sharedInstance]];
 #endif
         
         _overlayController = [[MSOverlayController alloc] init];
         _processFrames = NO;
-        _ts = -1;
     }
     return self;
 }
@@ -106,6 +105,7 @@ static void ms_avcapture_cleanup(void *p) {
 #if MS_SDK_REQUIREMENTS
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
     [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
+    [scannerSession release];
 #endif
     
     [super dealloc];
@@ -232,7 +232,7 @@ static void ms_avcapture_cleanup(void *p) {
     
     AVCaptureVideoDataOutput *output = (AVCaptureVideoDataOutput*) [captureSession.outputs objectAtIndex:0];
     [captureSession removeOutput:output];
-    
+        
     [self.previewLayer removeFromSuperlayer];
     
     self.previewLayer = nil;
@@ -256,7 +256,7 @@ static void ms_avcapture_cleanup(void *p) {
     // Scanning
     // -------------------------------------------------
     NSError *err = nil;
-    MSResult *result = [[MSScanner sharedInstance] scan:qry options:kMSScanOptions error:&err];
+    MSResult *result = [scannerSession scan:qry options:kMSScanOptions error:&err];
     if (err != nil) {
         MSDLog(@" [MOODSTOCKS SDK] SCAN ERROR: %@", [NSString stringWithCString:ms_errmsg([err code])
                                                                        encoding:NSUTF8StringEncoding]);
@@ -266,8 +266,6 @@ static void ms_avcapture_cleanup(void *p) {
     // Overlay refreshing
     // -------------------------------------------------
     if (result != nil) {
-        _ts = [[NSDate date] timeIntervalSince1970];
-        
         // Refresh the UI if a *new* result has been found
         if (![_result isEqualToResult:result]) {
             [_result release];
@@ -278,23 +276,6 @@ static void ms_avcapture_cleanup(void *p) {
                 NSDictionary *state = [NSDictionary dictionaryWithObject:result forKey:@"result"];
                 [_overlayController scanner:self stateUpdated:state];
             });
-        }
-    }
-    else if (_ts > 0) {
-        // Here we control how long the overlay will persist on screen when no result is found
-        // by the scanner. Feel free to configure this delay according to your needs
-        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-        if (now - _ts >= 1.5 /* seconds */) {
-            // This UI action must be dispatched into the main thread
-            CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^(void) {
-                MSResult *emptyResult = [[[MSResult alloc] initWithType:MS_RESULT_TYPE_NONE value:nil] autorelease];
-                NSDictionary *state = [NSDictionary dictionaryWithObject:emptyResult forKey:@"result"];
-                [_overlayController scanner:self stateUpdated:state];
-            });
-            
-            [_result release];
-            _result = nil;
-            _ts = -1;
         }
     }
     
@@ -342,6 +323,13 @@ static void ms_avcapture_cleanup(void *p) {
     [self stopCapture];
     
     [self dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark - Public
+
+- (void)reset {
+    [_result release];
+    _result = nil;
 }
 
 @end

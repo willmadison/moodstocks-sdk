@@ -24,7 +24,6 @@
 #import "RootViewController.h"
 
 #import "MSScannerController.h"
-#import "MBProgressHUD.h"
 #import "MSDebug.h"
 
 @interface RootViewController ()
@@ -41,13 +40,20 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // This is to make sure the app auto-syncs when it re-enters the foreground
-        // You are free to adapt this policy according to your needs
+        // This is usefule to turn on auto-sync when the app re-enters the foreground
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillEnterForeground)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
         
+        // IMPORTANT: here we trigger a synchronization at startup. In a real application context
+        //            you would have to carefully decide *when* and *how* to sync (i.e. with an UI
+        //            indicator or not) according to your needs.
+        //            We strongly recommend you to inform the user via ad-hoc UI elements at least at the
+        //            very first synchronization (i.e. when the scanner is empty) so that to prevent him
+        //            from accessing the scanner when the database is still empty.
+        //
+        //            See `scannerWillSync` below for more details
         [self sync];
     }
     return self;
@@ -80,12 +86,22 @@
     [scanButton setTitle:@"Scan" forState:UIControlStateNormal];
     scanButton.frame = CGRectMake(0.5 * (ww - bw), 0.5 * (hh - bh), bw, bh);
     [self.view addSubview:scanButton];
+    
+    _splashView = [[MSSplashView alloc] initWithFrame:CGRectMake(0, 0, ww, hh)];
+    [self.view addSubview:_splashView];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.navigationItem.title = @"Demo";
+}
+
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    
+    [_splashView release];
+    _splashView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -110,8 +126,15 @@
 #pragma mark Synchronization
 
 - (void)applicationWillEnterForeground {
-    // See comments within the CTOR for more details
+    // --
+    // OPTIONAL
+    // --
+    // Uncomment the line below if you want to trigger a sync each time the app
+    // re-enters the foreground. See comments within the CTOR for more details
+    
+    /*
     [self sync];
+    */
 }
 
 - (void)sync {
@@ -133,27 +156,47 @@
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     
-    // Here the policy is to display a "Loading" HUD at cold start only
-    // to prevent the end user from accessing the scanner while the database
-    // is still fully empty and thus nothing is scannable.
-    // You are free to adapt this policy according to your needs
-    if ([scanner count:nil] == 0) {
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        [hud setMinSize:CGSizeMake(220, 220)];
-        [hud setLabelText:@"Syncing"];
+    // NOTE: the synchronization always operates in the background and you are
+    //       free to display a splash view, etc or nothing at all, at your convenience.
+    //       Here we systematically display a splash view but you could omit it (for e.g.)
+    //       if the scanner is not empty (i.e. the scanner has already been synchronized
+    //       successfully in the past) with a check like:
+    //       if ([scanner count:nil] == 0) { /* ... */ }
+    [_splashView setIsAnimating:YES];
+    [_splashView setProgress:0.0f];
+    [_splashView setText:@"Initializing..."];
+    [_splashView setHidden:NO];
+}
+
+// --
+// OPTIONAL
+// --
+//    This to display the sync progress on the UI side. Feel free to remove this method if
+//    you choose to not display the determinate progress. Also feel free to adjust the way the
+//    info is displayed to the end user (i.e. wording, progress bar vs round progress, etc)
+- (void)didSyncWithProgress:(NSNumber *)current total:(NSNumber *)total {
+    float progress = [current floatValue] / [total floatValue];
+    int c = [current intValue];
+    int t = [total intValue];
+    if (c == 0) {
+        [_splashView setIsAnimating:NO];
     }
+    [_splashView setProgress:progress];
+    [_splashView setText:[NSString stringWithFormat:@"Syncing (%d of %d)", c, t]];
+    
+    MSDLog(@" [MOODSTOCKS SDK] SYNC PROGRESS %.1f%%", 100 * progress);
 }
 
 - (void)scannerDidSync:(MSScanner *)scanner {
     MSDLog(@" [MOODSTOCKS SDK] DID SYNC. DATABASE SIZE = %d IMAGE(S)", [scanner count:nil]);
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [_splashView setHidden:YES];
 }
 
 - (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error {
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    [MBProgressHUD hideHUDForView:self.view animated:YES];
+    [_splashView setHidden:YES];
     
     ms_errcode ecode = [error code];
     

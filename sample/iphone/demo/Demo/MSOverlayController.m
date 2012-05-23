@@ -34,14 +34,6 @@ static const NSInteger kMSInfoFontSize   = 14;
 // Trigger for the central target rotation
 - (void)deviceOrientationDidChange;
 
-// Internal methods that implements the overlay show/hide
-- (void)showResultView:(NSString *)result animation:(BOOL)anim;
-- (void)hideResultViewWithAnimation:(BOOL)anim;
-
-// Main wrappers for overlay show/hide
-- (void)showResult:(NSString *)result;
-- (void)hideResult;
-
 // Method to control the visibility of scanning controls
 - (void)showScannerInfo:(BOOL)show;
 - (UILabel *)getLabelWithTag:(NSInteger)tag;
@@ -63,6 +55,8 @@ static const NSInteger kMSInfoFontSize   = 14;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
+        
+        _scanner = nil;
     }
     return self;
 }
@@ -70,6 +64,9 @@ static const NSInteger kMSInfoFontSize   = 14;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+    
+    [_actionSheet release];
+    _actionSheet = nil;
     
     [super dealloc];
 }
@@ -109,7 +106,7 @@ static const NSInteger kMSInfoFontSize   = 14;
     NSMutableArray *scanInfo = [NSMutableArray array];
     [scanInfo addObject:@" [  ] EAN "];
     [scanInfo addObject:@" [  ] QR Code "];
-    [scanInfo addObject:@" [✔] 0 image "];
+    [scanInfo addObject:@" [✓] 0 image "];
     
     CGFloat offsetY = 0;
     for (NSString *text in scanInfo) {
@@ -227,114 +224,6 @@ static const NSInteger kMSInfoFontSize   = 14;
 	[UIView commitAnimations];
 }
 
-- (void)showResultView:(NSString *)result animation:(BOOL)anim {
-    [self showScannerInfo:NO];
-    
-    _hasResult = YES;
-    
-    CGFloat margin = 10;
-    UIFont *font = [UIFont systemFontOfSize:22];
-    UILineBreakMode bmode = UILineBreakModeTailTruncation;
-    CGSize textSize = [result sizeWithFont:font
-                         constrainedToSize:CGSizeMake(self.view.frame.size.width - margin, CGFLOAT_MAX)
-                             lineBreakMode:bmode];
-    CGFloat tX      = 0;
-    CGFloat tY      = self.view.frame.size.height;
-    CGFloat tWidth  = self.view.frame.size.width;
-    CGFloat tHeight = textSize.height + 2 * margin;
-    
-    UILabel* resultLabel        = [[UILabel alloc] init];
-    resultLabel.contentMode     = UIViewContentModeLeft;
-    resultLabel.lineBreakMode   = bmode;
-    resultLabel.numberOfLines   = 0; // i.e. no limit
-    resultLabel.backgroundColor = [UIColor clearColor];
-    resultLabel.textColor       = [UIColor whiteColor];
-    resultLabel.text            = result;
-    resultLabel.font            = font;
-    resultLabel.frame           = CGRectMake(margin, margin, textSize.width, textSize.height);
-    
-    MSResultView *resultView = [[[MSResultView alloc] init] autorelease];
-    resultView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.8];
-    resultView.frame = CGRectMake(tX, tY, tWidth, tHeight);
-    [resultView addSubview:resultLabel];
-    [resultLabel release];
-    
-    [self.view addSubview:resultView];
-    [UIView animateWithDuration:0.5 // second
-                          delay:0
-                        options:0
-                     animations:^{
-                         resultView.frame = CGRectMake(tX, tY - tHeight, tWidth, tHeight);
-                     }
-                     completion:^(BOOL finished){
-                         // nothing to do
-                     }
-     ];
-}
-
-- (void)hideResultViewWithAnimation:(BOOL)anim {
-    _hasResult = NO;
-    
-    MSResultView *resultView = nil;
-    for (UIView *v in [self.view subviews]) {
-        if ([v isKindOfClass:[MSResultView class]])
-            resultView = (MSResultView *) v;
-    }
-    
-    if (!resultView) {
-        // Should never happen
-        if (!_hasResult) {
-            [self showScannerInfo:YES];
-        }
-        return;
-    }
-    
-    CGFloat tX      = resultView.frame.origin.x;
-    CGFloat tY      = resultView.frame.origin.y;
-    CGFloat tWidth  = resultView.frame.size.width;
-    CGFloat tHeight = resultView.frame.size.height;
-    
-    if (anim) {
-        [UIView animateWithDuration:0.5 // second
-                              delay:0
-                            options:0
-                         animations:^{
-                             resultView.frame = CGRectMake(tX, tY + tHeight, tWidth, tHeight);
-                         }
-                         completion:^(BOOL finished){
-                             [resultView removeFromSuperview];
-                             // Since we are delayed, made sure to check that in
-                             // the meanwhile a new result has not been set
-                             if (!_hasResult) {
-                                 [self showScannerInfo:YES];
-                             }
-                         }
-         ];
-    }
-    else {
-        [resultView removeFromSuperview];
-        [self showScannerInfo:YES];
-    }
-}
-
-- (void)showResult:(NSString *)result {
-    MSResultView *resultView = nil;
-    for (UIView *v in [self.view subviews]) {
-        if ([v isKindOfClass:[MSResultView class]])
-            resultView = (MSResultView *) v;
-    }
-    if (resultView == nil) {
-        [self showResultView:result animation:YES];
-    }
-    else {
-        [self hideResultViewWithAnimation:NO];
-        [self showResultView:result animation:YES];
-    }
-}
-
-- (void)hideResult {
-    [self hideResultViewWithAnimation:YES];
-}
 
 - (void)showScannerInfo:(BOOL)show {
     for (UIView *v in [self.view subviews]) {
@@ -369,7 +258,7 @@ static const NSInteger kMSInfoFontSize   = 14;
             if (self.decodeEAN_8)  [formats addObject:@"8"];
             if (self.decodeEAN_13) [formats addObject:@"13"];
         }
-        NSString *head = ean ? @"✔" : @"  ";
+        NSString *head = ean ? @"✓" : @"  ";
         NSString *tail = ean ? [NSString stringWithFormat:@"(%@)", [formats componentsJoinedByString:@","]] : @"";
         
         NSString *text = [NSString stringWithFormat:@" [%@] EAN %@ ", head, tail];
@@ -390,7 +279,7 @@ static const NSInteger kMSInfoFontSize   = 14;
     UILabel * label = [self getLabelWithTag:1];
     
     if (label != nil) {
-        NSString *text = [NSString stringWithFormat:@" [%@] QR Code ", (self.decodeQRCode ? @"✔" : @"  ")];
+        NSString *text = [NSString stringWithFormat:@" [%@] QR Code ", (self.decodeQRCode ? @"✓" : @"  ")];
         
         UIFont *font = [UIFont systemFontOfSize:kMSInfoFontSize];
         UILineBreakMode breakMode = UILineBreakModeWordWrap;
@@ -408,7 +297,7 @@ static const NSInteger kMSInfoFontSize   = 14;
     UILabel * label = [self getLabelWithTag:2];
     
     if (label != nil) {
-        NSString *text = [NSString stringWithFormat:@" [✔] %d %@",
+        NSString *text = [NSString stringWithFormat:@" [✓] %d %@",
                           count,
                           (count > 1 ? @"images" : @"image")];
         
@@ -427,6 +316,8 @@ static const NSInteger kMSInfoFontSize   = 14;
 #pragma mark - MSScannerOverlayDelegate
 
 - (void)scanner:(MSScannerController *)scanner stateUpdated:(NSDictionary *)state {
+    _scanner = scanner;
+    
     // Toggle whole scanner info (target + text)
     if ([(NSNumber *) [state objectForKey:@"ready"] boolValue]) {
         [self showScannerInfo:YES];
@@ -486,13 +377,38 @@ static const NSInteger kMSInfoFontSize   = 14;
                     break;
             }
             
-            [self showResult:resultStr];
-        }
-        else {
-            [self hideResult];
+            // Retrieve and dismiss former result (if any)
+            if (_actionSheet != nil) {
+                [_actionSheet dismissWithClickedButtonIndex:-1 animated:NO];
+                
+                [_actionSheet release];
+                _actionSheet = nil;
+            }
+            
+            // Present the most up-to-date result in overlay
+            //
+            // NOTE: this is a very basic way to display some information / action in overlay
+            //       You can think of it as an "hello world". In a real application you may want
+            //       to introduce your own UI elements and animations according to your needs
+            _actionSheet = [[UIActionSheet alloc] initWithTitle:resultStr
+                                                       delegate:self
+                                              cancelButtonTitle:@"OK"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:nil];
+            _actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+            [_actionSheet showInView:self.view];
         }
     }
     
+}
+
+#pragma mark - UIActionSheetDelegate
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+        // Tell the scanner there is no need to memorize the former result
+        [_scanner reset];
+    }
 }
 
 @end
