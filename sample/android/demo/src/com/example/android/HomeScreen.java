@@ -17,7 +17,43 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 	public static final String TAG = "HomeScreen";
 	private boolean compatible = false;
 	private Scanner scanner = null;
+	
+	/* SYNC POLICY: this illustrates our recommended best practices concerning
+	 * the synchronization process. There are 3 cases to distinguish:
+	 * 
+	 * 1 - Cold Start: The app has just been launched for the first time 
+	 * 		 and the database is currently empty, which implies that the
+	 * 		 scanner has never been synced before and will not be able to
+	 * 		 work until a first sync completes:
+	 * 
+	 * 		 a - We show a splash screen including a progress bar that will
+	 *				 let the user know that a synchronization is running and 
+	 *				 keep him/her posted on the sync progression.
+	 *		 b - In case this sync fails (for example because there is no
+	 *				 available network), we inform the user that an error occurred
+	 *				 and force quit the app as the scanner will not be able to work
+	 *				 correctly.
+	 *
+	 *		 This case is the only one in which we show a progress bar or error
+	 *		 popups, to prevent the user from trying to use the scanner as the
+	 *		 offline recognition will not be able to work.
+	 *
+	 * 2 - The app has been killed and is re-launched, which in most cases 
+	 * 		 implies that the user has not used the app for quite a long time:
+	 * 		 we perform a seamless sync.
+	 * 
+	 * 3 - The app was still running in the background and comes back to the
+	 * 		 the foreground, which in most cases implies that the user has run
+	 * 		 the app recently: to avoid useless synchronizations, we perform a 
+	 * 		 seamless sync only if the previous one occurred more than one day 
+	 * 		 ago.
+	 */
+	
+	/* sync related variables */
 	private Splash splash = null;
+	private long last_sync = 0;
+	private boolean cold_start = true;
+	private static final long DAY = 86400000; /* duration of a day in ms */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,23 +71,15 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 			splash = (Splash) findViewById(R.id.splash);
 			try {
 				this.scanner = Scanner.get();
-				/* open the scanner, necessary to perform any operation using it.
+				/* Open the scanner, necessary to perform any operation using it.
 				 * This step also checks at runtime that the device is compatible.
 				 * If the device is not compatible, it will throw a RuntimeException
 				 * and crash the app.
 				 */
 				scanner.open(this, "ms.db");
-				/* Synchronize the image signatures. In this simple example, we chose a very
-				 * minimalistic synchronization policy: we show a splash screen while syncing
-				 * in the background each time the application starts, which can be pretty rare
-				 * as applications can stay alive in the background for days or weeks.
-				 * In a real application context, you will have to place this step carefully
-				 * according to your needs.
-				 * Please note that you can perform this sync in the background, without displaying
-				 * anything to the user. Nevertheless, we highly recommend that you inform the user
-				 * at least for the very first synchronization.
-				 */
-				scanner.sync(this);
+				/* Cold start detection */
+				if (scanner.count() != 0)
+					cold_start = false;
 			} catch (MoodstocksError e) {
 				/* an error occurred while opening the scanner */
 				if (e.getErrorCode() == MoodstocksError.Code.CREDMISMATCH) {
@@ -95,6 +123,13 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
       builder.show();
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (System.currentTimeMillis() - last_sync > DAY)
+			scanner.sync(this);
+	}
 
 	@Override
 	public void onDestroy() {
@@ -123,49 +158,39 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 
 	@Override
 	public void onSyncStart() {
-		splash.show(true);
+		if (cold_start)
+			splash.show(true);
 	}
 
 	@Override
 	public void onSyncComplete() {
-		splash.show(false);
+		last_sync = System.currentTimeMillis();
+		if (cold_start) {
+			splash.show(false);
+			cold_start = false;
+		}
 	}
 
 	@Override
 	public void onSyncFailed(MoodstocksError e) {
-		/* Sync has failed: we check that the database
-		 * contains image signatures. If so, the signatures
-		 * may be outdated but the scanner will work, so we
-		 * just inform the user that he/she should retry
-		 * synchronizing.
-		 * If the database is empty, we stop the application
-		 * to force the user to try again later, as the problem
-		 * probably comes from the network.
-		 */
-		int count = 0;
-		try {
-			count = scanner.count();
-		}
-		catch (MoodstocksError e2) {
-			// fail silently: we assume count = 0.
-		}
-		if (count != 0) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Error!");
-			builder.setMessage("Synchronization failed, the application " +
-					"content may be outdated. Please check you connectivity and" +
-					" try again from the menu!\n ("+e.getMessage()+")");
-			builder.setPositiveButton("OK", null);
-			builder.create().show();
-			splash.show(false);
-		}
-		else {
+		e.log();
+		if (cold_start) {
+			int ecode = e.getErrorCode();
+			String s;
+			switch(ecode) {
+				case MoodstocksError.Code.NOCONN: s = "The Internet connection does not work.";
+																					break;
+				case MoodstocksError.Code.SLOWCONN: s = "The Internet connection is too slow.";
+																						break;
+				case MoodstocksError.Code.TIMEOUT: s = "The operation timed out.";
+																					 break;
+				default: s = "An internal error occurred (code = "+e+").";
+								 break;
+			}
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setCancelable(false);
-			builder.setTitle("Error!");
-			builder.setMessage("Initial synchronization failed! The scanner won't" +
-					" be able to work. Please check your connectivity and relaunch " +
-					"the application.");
+			builder.setTitle("Oops!");
+			builder.setMessage(s+" Please try again later.");
 			builder.setNeutralButton("Quit", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					finish();
@@ -177,7 +202,8 @@ public class HomeScreen extends Activity implements View.OnClickListener, Scanne
 
 	@Override
 	public void onSyncProgress(int total, int current) {
-		splash.update(total, current);
+		if (cold_start)
+			splash.update(total, current);
 	}
 	
 	//------

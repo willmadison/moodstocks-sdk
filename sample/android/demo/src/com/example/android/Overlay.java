@@ -1,13 +1,9 @@
 package com.example.android;
 
-import com.moodstocks.android.*;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SlidingDrawer;
@@ -15,12 +11,10 @@ import android.widget.TextView;
 import android.widget.ScrollView;
 
 public class Overlay extends RelativeLayout 
-implements ScanActivity.Listener, OrientationListener.Callback, 
-SlidingDrawer.OnDrawerCloseListener, SlidingDrawer.OnDrawerOpenListener {
+implements ScanActivity.Listener, SlidingDrawer.OnDrawerCloseListener, 
+					 SlidingDrawer.OnDrawerOpenListener {
 
 	public static final String TAG = "Overlay";
-	private int angle = 0;
-	private int ori = 0;
 	private String ean_info = "";
 	private String qr_info = "";
 	private String images_info = "";
@@ -95,17 +89,6 @@ SlidingDrawer.OnDrawerCloseListener, SlidingDrawer.OnDrawerOpenListener {
 		}
 	}
 
-	private void rotateTarget(int r) {
-		ImageView v = (ImageView) findViewById(R.id.target);
-		if (v.getVisibility() == VISIBLE) {
-			Animation anim = new RotateAnimation(angle, angle+r, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-			anim.setDuration(250);
-			anim.setFillAfter(true);
-			v.startAnimation(anim);
-			angle = (360 + angle+r) % 360;
-		}
-	}
-
 	private void allInfoVisible(boolean b) {
 		int v = b ? VISIBLE : INVISIBLE;
 		((TextView) findViewById(R.id.info1)).setVisibility(v);
@@ -141,27 +124,6 @@ SlidingDrawer.OnDrawerCloseListener, SlidingDrawer.OnDrawerOpenListener {
 			displayResult(result.getString("value"));
 		}
 		if (drawer.isOpened()) allInfoVisible(false);
-	}
-
-	//------------------------------
-	// OrientationListener.Callback
-	//------------------------------
-
-	@Override
-	public void onOrientationChanged(int o) {
-		int diff = (4 + o - ori)%4;
-		int r;
-		switch(diff) {
-		case 1: r = -90;
-		break;
-		case 2: r = 180;
-		break;
-		case 3: r = 90;
-		break;
-		default: return;
-		}
-		rotateTarget(r);
-		ori = o;
 	}
 
 	//-------------------------------------

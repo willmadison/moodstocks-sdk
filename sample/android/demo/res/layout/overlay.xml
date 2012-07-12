@@ -77,15 +77,6 @@
         android:paddingRight="5dp"
         android:text="@string/info1"
         android:visibility="invisible" />
-
-    <ImageView
-        android:id="@+id/target"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:contentDescription="@string/target"
-        android:src="@drawable/target" />
         
     <SlidingDrawer
         android:id="@+id/drawer"

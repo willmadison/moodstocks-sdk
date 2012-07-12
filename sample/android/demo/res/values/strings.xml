@@ -5,7 +5,6 @@
     <string name="info2">Place it upright</string>
     <string name="home_scan">Scan</string>
     <string name="scan_name">ScanActivity</string>
-    <string name="target">Target View</string>
     <string name="initializing">Initialization...</string>
     <string name="syncing">Synchronizing</string>
 </resources>

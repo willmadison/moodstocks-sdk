@@ -48,7 +48,6 @@ public class ScanActivity extends Activity implements ScannerSession.ScanListene
 		OrientationListener.init(this);
 		status = new Bundle();
 		OrientationListener.get().enable();
-		OrientationListener.get().setCallback(overlay);
 		SurfaceView surface = (SurfaceView) findViewById(R.id.preview);
 		boolean camera_success = CameraManager.get().start(this, surface);
 		if (!camera_success) finish();
