@@ -40,20 +40,15 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        _lastSync = 0;
+        
         // This is usefule to turn on auto-sync when the app re-enters the foreground
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillEnterForeground)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:nil];
         
-        // IMPORTANT: here we trigger a synchronization at startup. In a real application context
-        //            you would have to carefully decide *when* and *how* to sync (i.e. with an UI
-        //            indicator or not) according to your needs.
-        //            We strongly recommend you to inform the user via ad-hoc UI elements at least at the
-        //            very first synchronization (i.e. when the scanner is empty) so that to prevent him
-        //            from accessing the scanner when the database is still empty.
-        //
-        //            See `scannerWillSync` below for more details
+        // Please refer to the synchronization policy notes below for more details
         [self sync];
     }
     return self;
@@ -122,19 +117,44 @@
     [navController release];
 }
 
+// -------------------------------------------------
+// NOTES AROUND THE SYNCHRONIZATION POLICY
+// -------------------------------------------------
+//
+// Here's a recap about the synchronization policy retained within this demo app:
+//
+//                       | SYNC                  | SHOW PROGRESS BAR  | SHOW ERROR
+// -------------------------------------------------------------------------------
+// (1) COLD START        | yes                   | yes                | yes
+// (2) LAUNCH            | yes                   | no                 | no
+// (3) ENTER FOREGROUND  | if last sync > 1 day  | no                 | no
+//
+// (1) Cold start = the image database is empty (i.e. no successful sync occurred yet).
+//     It is thus important:
+//     * to prevent the user from accessing the scanner
+//     * to keep the user notified of the synchronization progress
+//     * to warn the user if an error occurred (e.g. no Internet connection)
+//
+// (2) Launch = the app starts with a non empty database.
+//     Let the sync operates seamlessly in the background and fail silently if an error
+//     occurred. That way the user can directly start using the scanner while the latest
+//     changes (if any) are being fetched.
+//
+// (3) Enter foreground = the app has been switched in background then foreground, and the
+//     database is not empty. Do the same as above except avoid performing a sync except if
+//     the last successful sync is too old (1 day here).
+//
+// IMPORTANT: keep in mind that this is an "hello world application". In a real application
+//            context you would have to adapt this policy to your needs and thus carefully
+//            decide *when* and *how* to sync (i.e. w/ or w/o a progress bar on the UI side).
+
 #pragma mark -
 #pragma mark Synchronization
 
 - (void)applicationWillEnterForeground {
-    // --
-    // OPTIONAL
-    // --
-    // Uncomment the line below if you want to trigger a sync each time the app
-    // re-enters the foreground. See comments within the CTOR for more details
-    
-    /*
-    [self sync];
-    */
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    if (now - _lastSync >= 86400.0 /* seconds */)
+        [self sync];
 }
 
 - (void)sync {
@@ -156,24 +176,13 @@
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     
-    // NOTE: the synchronization always operates in the background and you are
-    //       free to display a splash view, etc or nothing at all, at your convenience.
-    //       Here we systematically display a splash view but you could omit it (for e.g.)
-    //       if the scanner is not empty (i.e. the scanner has already been synchronized
-    //       successfully in the past) with a check like:
-    //       if ([scanner count:nil] == 0) { /* ... */ }
+    BOOL hide = ([scanner count:nil] > 0) ? YES : NO;
     [_splashView setIsAnimating:YES];
     [_splashView setProgress:0.0f];
     [_splashView setText:@"Initializing..."];
-    [_splashView setHidden:NO];
+    [_splashView setHidden:hide];
 }
 
-// --
-// OPTIONAL
-// --
-//    This to display the sync progress on the UI side. Feel free to remove this method if
-//    you choose to not display the determinate progress. Also feel free to adjust the way the
-//    info is displayed to the end user (i.e. wording, progress bar vs round progress, etc)
 - (void)didSyncWithProgress:(NSNumber *)current total:(NSNumber *)total {
     float progress = [current floatValue] / [total floatValue];
     int c = [current intValue];
@@ -192,6 +201,8 @@
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [_splashView setHidden:YES];
+    
+    _lastSync = [[NSDate date] timeIntervalSince1970];
 }
 
 - (void)scanner:(MSScanner *)scanner failedToSyncWithError:(NSError *)error {
@@ -208,13 +219,29 @@
         
         MSDLog(@" [MOODSTOCKS SDK] FAILED TO SYNC WITH ERROR: %@", errStr);
         
-        // Fail silently when we are not at cold start
-        // Feel free to adapt this to your needs
         if ([scanner count:nil] > 0)
             return;
         
-        [[[[UIAlertView alloc] initWithTitle:@"Sync error"
-                                     message:errStr
+        switch (ecode) {
+            case MS_NOCONN:
+                errStr = @"The Internet connection does not work.";
+                break;
+                
+            case MS_SLOWCONN:
+                errStr = @"The Internet connection is too slow.";
+                break;
+                
+            case MS_TIMEOUT:
+                errStr = @"The operation timed out.";
+                break;
+                
+            default:
+                errStr = [NSString stringWithFormat:@"An internal error occurred (code = %d).", ecode];
+                break;
+        }
+        
+        [[[[UIAlertView alloc] initWithTitle:@"Sync Error"
+                                     message:[NSString stringWithFormat:@"%@ Please try again later.", errStr]
                                     delegate:nil
                            cancelButtonTitle:@"OK"
                            otherButtonTitles:nil] autorelease] show];

@@ -7,11 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		822B28C314991433001A7DD1 /* MSResultView.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28C214991433001A7DD1 /* MSResultView.m */; };
 		822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28CA149914E3001A7DD1 /* MSScannerController.m */; };
 		822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 822B28CD149914FE001A7DD1 /* MSOverlayController.m */; };
-		822B28D314991A8B001A7DD1 /* target.png in Resources */ = {isa = PBXBuildFile; fileRef = 822B28D114991A8B001A7DD1 /* target.png */; };
-		822B28D414991A8B001A7DD1 /* target@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 822B28D214991A8B001A7DD1 /* target@2x.png */; };
 		822B28D814991AC0001A7DD1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28D714991AC0001A7DD1 /* QuartzCore.framework */; };
 		822B28DC14991ADC001A7DD1 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DB14991ADC001A7DD1 /* CoreVideo.framework */; };
 		822B28DE14991AEF001A7DD1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 822B28DD14991AEF001A7DD1 /* CoreMedia.framework */; };
@@ -28,14 +25,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		822B28C114991433001A7DD1 /* MSResultView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSResultView.h; sourceTree = "<group>"; };
-		822B28C214991433001A7DD1 /* MSResultView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSResultView.m; sourceTree = "<group>"; };
 		822B28C9149914E2001A7DD1 /* MSScannerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSScannerController.h; sourceTree = "<group>"; };
 		822B28CA149914E3001A7DD1 /* MSScannerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSScannerController.m; sourceTree = "<group>"; };
 		822B28CC149914FE001A7DD1 /* MSOverlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSOverlayController.h; sourceTree = "<group>"; };
 		822B28CD149914FE001A7DD1 /* MSOverlayController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSOverlayController.m; sourceTree = "<group>"; };
-		822B28D114991A8B001A7DD1 /* target.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = target.png; sourceTree = "<group>"; };
-		822B28D214991A8B001A7DD1 /* target@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "target@2x.png"; sourceTree = "<group>"; };
 		822B28D514991AAD001A7DD1 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		822B28D714991AC0001A7DD1 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		822B28D914991ACF001A7DD1 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -77,15 +70,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		822B28C01499141D001A7DD1 /* Result View */ = {
-			isa = PBXGroup;
-			children = (
-				822B28C114991433001A7DD1 /* MSResultView.h */,
-				822B28C214991433001A7DD1 /* MSResultView.m */,
-			);
-			name = "Result View";
-			sourceTree = "<group>";
-		};
 		822B28CF149916B9001A7DD1 /* Scanner */ = {
 			isa = PBXGroup;
 			children = (
@@ -98,7 +82,6 @@
 		822B28D0149916C0001A7DD1 /* Overlay */ = {
 			isa = PBXGroup;
 			children = (
-				822B28C01499141D001A7DD1 /* Result View */,
 				822B28CC149914FE001A7DD1 /* MSOverlayController.h */,
 				822B28CD149914FE001A7DD1 /* MSOverlayController.m */,
 			);
@@ -157,8 +140,6 @@
 			isa = PBXGroup;
 			children = (
 				82DEE69814991D97002BA5B0 /* Default.png */,
-				822B28D114991A8B001A7DD1 /* target.png */,
-				822B28D214991A8B001A7DD1 /* target@2x.png */,
 				82A165A3149907C200B8AEB4 /* Demo-Info.plist */,
 				82A165A4149907C200B8AEB4 /* InfoPlist.strings */,
 				82A165A7149907C200B8AEB4 /* main.m */,
@@ -228,8 +209,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				82A165A6149907C200B8AEB4 /* InfoPlist.strings in Resources */,
-				822B28D314991A8B001A7DD1 /* target.png in Resources */,
-				822B28D414991A8B001A7DD1 /* target@2x.png in Resources */,
 				82DEE69914991D97002BA5B0 /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,7 +222,6 @@
 			files = (
 				82A165A8149907C200B8AEB4 /* main.m in Sources */,
 				82A165AC149907C200B8AEB4 /* MSAppDelegate.m in Sources */,
-				822B28C314991433001A7DD1 /* MSResultView.m in Sources */,
 				822B28CB149914E3001A7DD1 /* MSScannerController.m in Sources */,
 				822B28CE149914FE001A7DD1 /* MSOverlayController.m in Sources */,
 				82E7F44F151CC51700B1DC34 /* RootViewController.m in Sources */,

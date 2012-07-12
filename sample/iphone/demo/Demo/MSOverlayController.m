@@ -23,16 +23,11 @@
 
 #import "MSOverlayController.h"
 
-#import "MSResultView.h"
-
 /* UI settings */
 static const NSInteger kMSScanInfoMargin = 5;
 static const NSInteger kMSInfoFontSize   = 14;
 
 @interface MSOverlayController ()
-
-// Trigger for the central target rotation
-- (void)deviceOrientationDidChange;
 
 // Method to control the visibility of scanning controls
 - (void)showScannerInfo:(BOOL)show;
@@ -54,8 +49,6 @@ static const NSInteger kMSInfoFontSize   = 14;
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceOrientationDidChange) name:UIDeviceOrientationDidChangeNotification object:nil];
-        
         _scanner = nil;
     }
     return self;
@@ -63,8 +56,6 @@ static const NSInteger kMSInfoFontSize   = 14;
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-    
     [_actionSheet release];
     _actionSheet = nil;
     
@@ -88,15 +79,6 @@ static const NSInteger kMSInfoFontSize   = 14;
     self.view.autoresizesSubviews = YES;
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.view.backgroundColor = [UIColor clearColor];
-    
-    UIImage *targetImg = [UIImage imageNamed:@"target.png"];
-    CGFloat tw = 0.5 * (self.view.frame.size.width - targetImg.size.width);
-    CGFloat th = 0.5 * (self.view.frame.size.height - targetImg.size.height);
-    UIImageView *targetView = [[UIImageView alloc] initWithFrame:CGRectMake(tw, th, targetImg.size.width, targetImg.size.height)];
-    [targetView setImage:targetImg];
-    [targetView setAlpha:0.0];
-    [self.view addSubview:targetView];
-    [targetView release];
     
     NSInteger tag = 0;
     UIFont *font = [UIFont systemFontOfSize:kMSInfoFontSize];
@@ -187,48 +169,9 @@ static const NSInteger kMSInfoFontSize   = 14;
 
 #pragma mark - Private stuff
 
-- (void)deviceOrientationDidChange {
-    UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
-    
-    BOOL undefined = NO;
-    CGFloat angle = 0.0;
-    switch (deviceOrientation) {
-        case UIDeviceOrientationPortrait:           angle =  0.0;         break;
-        case UIDeviceOrientationPortraitUpsideDown: angle =  3.14159;     break;
-        case UIDeviceOrientationLandscapeLeft:      angle =  3.14159/2.0; break;
-        case UIDeviceOrientationLandscapeRight:     angle = -3.14159/2.0; break;
-        case UIDeviceOrientationUnknown:
-        case UIDeviceOrientationFaceDown:
-        case UIDeviceOrientationFaceUp:
-            undefined = YES;
-            break;
-    }
-    
-    if (undefined) return;
-    
-    UIImageView* targetView = nil;
-    for (UIView *v in [self.view subviews]) {
-        if ([v isKindOfClass:[UIImageView class]])
-            targetView = (UIImageView *) v;
-    }
-    
-	CGAffineTransform transform = CGAffineTransformMakeRotation(angle);
-	
-	[UIView beginAnimations:@"rotateTarget" context:nil];
-	[UIView setAnimationDelegate:self];
-	[UIView setAnimationCurve:UIViewAnimationCurveLinear];
-	[UIView setAnimationDuration:0.25];
-    
-    targetView.transform = transform;
-	
-	[UIView commitAnimations];
-}
-
-
 - (void)showScannerInfo:(BOOL)show {
     for (UIView *v in [self.view subviews]) {
-        if ([v isKindOfClass:[UIImageView class]] ||
-            [v isKindOfClass:[UILabel class]])
+        if ([v isKindOfClass:[UILabel class]])
             [v setAlpha:(show ? 1.0 : 0.0)];
     }
 }

@@ -25,8 +25,6 @@
 
 #import "MSScannerController.h"
 
-@class MSResultView;
-
 @interface MSOverlayController : UIViewController<MSScannerOverlayDelegate
 ,UIActionSheetDelegate> {
     MSScannerController *_scanner; // parent scanner

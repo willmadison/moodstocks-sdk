@@ -29,6 +29,7 @@
 
 @interface RootViewController : UIViewController <MSScannerDelegate> {
     MSSplashView *_splashView;
+    NSTimeInterval _lastSync; // timestamp of last successful sync
 }
 
 @end
